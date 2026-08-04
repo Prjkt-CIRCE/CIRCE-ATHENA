@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/platea"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <!-- AREA PRINCIPAL -->
+  <div class="main-area">
+    <div class="page-header">
+      <span class="page-header__title">Banco de Fotos</span>
+      <span class="page-header__subtitle">Novo cadastro</span>
+      <div class="page-header__spacer"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- AVISO LEGAL OBRIGATORIO (CA-AT02.7) -->
+      <div class="alert alert--warning" style="margin-bottom:24px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <span><strong>Aviso:</strong> Sugestoes automaticas de reconhecimento facial sao pendentes de validacao humana obrigatoria. Nao constituem identificacao.</span>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h2 style="font-size:15px;font-weight:600">Cadastrar Nova Foto</h2>
+        <a href="/photos" class="btn-secondary">Voltar ao Banco</a>
+      </div>
+
+      {% if error %}
+      <div class="alert alert--error">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="8" r="7"/><path d="M8 5v4M8 10.5v.5"/></svg>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      {% if success %}
+      <div class="alert alert--success">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="8" r="7"/><path d="M5 8l2 2 4-4"/></svg>
+        {{ success }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/photos/new" enctype="multipart/form-data">
+
+        <!-- FOTO -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-label">Imagem</div>
+          <div class="form-group">
+            <label class="form-label">Arquivo de foto <span class="req">*</span></label>
+            <input type="file" name="foto" accept=".jpg,.jpeg,.png,.bmp,.webp" required class="form-input" style="padding:7px 12px;cursor:pointer">
+            <div style="font-size:11px;color:var(--text-tertiary);margin-top:5px">Formatos: JPG, PNG, BMP, WEBP. Maximo 20 MB.</div>
+          </div>
+        </div>
+
+        <!-- IDENTIFICACAO -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-label">Identificacao</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Nome completo <span class="req">*</span></label>
+              <input type="text" name="nome_completo" required placeholder="Se desconhecido: Nao identificado" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Alcunha(s)</label>
+              <input type="text" name="alcunhas" placeholder="Separadas por virgula" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CPF</label>
+              <input type="text" name="cpf" placeholder="Somente digitos" maxlength="11" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Data de nascimento</label>
+              <input type="date" name="data_nascimento" class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- CARACTERISTICAS FISICAS -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-label">Caracteristicas fisicas</div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Sexo <span class="req">*</span></label>
+              <select name="sexo" required class="form-input">
+                <option value="">Selecione...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Nao identificado">Nao identificado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Etnia/cor <span class="req">*</span></label>
+              <select name="etnia_cor" required class="form-input">
+                <option value="">Selecione...</option>
+                <option value="Branca">Branca</option>
+                <option value="Preta">Preta</option>
+                <option value="Parda">Parda</option>
+                <option value="Amarela">Amarela</option>
+                <option value="Indigena">Indigena</option>
+                <option value="Nao identificada">Nao identificada</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estatura estimada</label>
+              <select name="estatura" class="form-input">
+                <option value="">Nao informado</option>
+                <option value="Baixa">Baixa (&lt;1,65m)</option>
+                <option value="Media">Media (1,65-1,80m)</option>
+                <option value="Alta">Alta (&gt;1,80m)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Compleicao</label>
+              <select name="compleicao" class="form-input">
+                <option value="">Nao informado</option>
+                <option value="Magra">Magra</option>
+                <option value="Media">Media</option>
+                <option value="Robusta">Robusta</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:span 2">
+              <label class="form-label">Sinais particulares</label>
+              <input type="text" name="sinais_particulares" placeholder="Ex: tatuagem de cobra no antebraco direito, cicatriz no queixo" class="form-input">
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Padrao: o que + onde + lado. Seja especifico para maximizar a recuperacao.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VINCULACAO -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-label">Vinculacao (opcional)</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Caso vinculado</label>
+              <input type="text" name="caso_vinculado" placeholder="Numero ou nome do caso" class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- PROCEDENCIA -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="section-label">Procedencia e cadeia de custodia</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Contexto da foto <span class="req">*</span></label>
+              <select name="contexto_foto" required class="form-input">
+                <option value="">Selecione...</option>
+                <option value="Flagrante">Flagrante</option>
+                <option value="Boletim de ocorrencia">Boletim de ocorrencia</option>
+                <option value="OSINT">OSINT</option>
+                <option value="Fonte humana">Fonte humana</option>
+                <option value="Camera publica">Camera publica</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Grau de confiabilidade <span class="req">*</span></label>
+              <select name="grau_confiabilidade" required class="form-input">
+                <option value="">Selecione...</option>
+                <option value="Alto">Alto</option>
+                <option value="Medio">Medio</option>
+                <option value="Baixo">Baixo</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:span 2">
+              <label class="form-label">Fonte <span class="req">*</span></label>
+              <input type="text" name="fonte" required placeholder="Ex: Camera 03 da UPA Central, 12/07/2026 — captura realizada pela equipe de campo" class="form-input">
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">Campo de cadeia de custodia — seja preciso. Quem forneceu ou onde foi obtida.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OBSERVACOES -->
+        <div class="card" style="margin-bottom:24px">
+          <div class="section-label">Observacoes livres</div>
+          <div class="form-group" style="margin-bottom:0">
+            <textarea name="observacoes" rows="3" placeholder="Qualquer contexto adicional relevante..." class="form-input" style="resize:vertical"></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end">
+          <a href="/photos" class="btn-secondary">Cancelar</a>
+          <button type="submit" class="btn-primary">Cadastrar Foto</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Banco de Fotos — Cadastro</span>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/platea"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <!-- AREA PRINCIPAL -->
+  <div class="main-area">
+    <div class="page-header">
+      <span class="page-header__title">Banco de Fotos</span>
+      <span class="page-header__subtitle">{{ total }} registro(s)</span>
+      <div class="page-header__spacer"></div>
+      <a href="/photos/new" class="btn-primary" style="text-decoration:none;font-size:13px;padding:7px 16px">+ Cadastrar Foto</a>
+      <div class="page-header__divider"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- AVISO LEGAL -->
+      <div class="alert alert--warning" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <span><strong>Sugestoes automaticas de reconhecimento facial sao pendentes de validacao humana obrigatoria. Nao constituem identificacao.</strong></span>
+      </div>
+
+      <!-- FILTROS -->
+      <form method="get" action="/photos" style="margin-bottom:20px">
+        <div class="card">
+          <div class="section-label">Filtros de busca</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr auto;gap:12px;align-items:flex-end">
+            <div>
+              <label class="form-label">Nome</label>
+              <input type="text" name="nome" value="{{ filtros.nome }}" placeholder="Nome ou parte..." class="form-input">
+            </div>
+            <div>
+              <label class="form-label">Sexo</label>
+              <select name="sexo" class="form-input">
+                <option value="">Todos</option>
+                <option value="Masculino" {% if filtros.sexo == "Masculino" %}selected{% endif %}>Masculino</option>
+                <option value="Feminino" {% if filtros.sexo == "Feminino" %}selected{% endif %}>Feminino</option>
+                <option value="Nao identificado" {% if filtros.sexo == "Nao identificado" %}selected{% endif %}>N. ident.</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Etnia/cor</label>
+              <select name="etnia_cor" class="form-input">
+                <option value="">Todas</option>
+                <option value="Branca" {% if filtros.etnia_cor == "Branca" %}selected{% endif %}>Branca</option>
+                <option value="Preta" {% if filtros.etnia_cor == "Preta" %}selected{% endif %}>Preta</option>
+                <option value="Parda" {% if filtros.etnia_cor == "Parda" %}selected{% endif %}>Parda</option>
+                <option value="Amarela" {% if filtros.etnia_cor == "Amarela" %}selected{% endif %}>Amarela</option>
+                <option value="Indigena" {% if filtros.etnia_cor == "Indigena" %}selected{% endif %}>Indigena</option>
+                <option value="Nao identificada" {% if filtros.etnia_cor == "Nao identificada" %}selected{% endif %}>N. ident.</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Confiabilidade</label>
+              <select name="grau_confiabilidade" class="form-input">
+                <option value="">Todos</option>
+                <option value="Alto" {% if filtros.grau_confiabilidade == "Alto" %}selected{% endif %}>Alto</option>
+                <option value="Medio" {% if filtros.grau_confiabilidade == "Medio" %}selected{% endif %}>Medio</option>
+                <option value="Baixo" {% if filtros.grau_confiabilidade == "Baixo" %}selected{% endif %}>Baixo</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Sinais particulares</label>
+              <input type="text" name="sinais_particulares" value="{{ filtros.sinais_particulares }}" placeholder="Ex: tatuagem cobra..." class="form-input">
+            </div>
+            <div style="display:flex;gap:8px">
+              <button type="submit" class="btn-primary" style="white-space:nowrap">Buscar</button>
+              <a href="/photos" class="btn-secondary" style="white-space:nowrap">Limpar</a>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- TABELA -->
+      <div class="card" style="padding:0;overflow:hidden">
+        {% if fotos %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:48px">ID</th>
+              <th>Nome</th>
+              <th>Sexo</th>
+              <th>Etnia/cor</th>
+              <th>Contexto</th>
+              <th>Confiabilidade</th>
+              <th>Embedding</th>
+              <th>Cadastrado em</th>
+              <th>Operador</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for foto in fotos %}
+            <tr>
+              <td class="mono-cell">#{{ foto.id }}</td>
+              <td>
+                <div style="font-weight:500">{{ foto.nome_completo }}</div>
+                {% if foto.alcunhas %}<div style="font-size:11px;color:var(--text-tertiary)">{{ foto.alcunhas }}</div>{% endif %}
+              </td>
+              <td>{{ foto.sexo }}</td>
+              <td>{{ foto.etnia_cor }}</td>
+              <td><span class="badge badge--muted">{{ foto.contexto_foto }}</span></td>
+              <td>
+                {% if foto.grau_confiabilidade == "Alto" %}
+                  <span class="badge badge--success">Alto</span>
+                {% elif foto.grau_confiabilidade == "Medio" %}
+                  <span class="badge badge--warning">Medio</span>
+                {% else %}
+                  <span class="badge badge--error">Baixo</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if foto.embedding_path %}
+                  <span class="badge badge--success">Sim</span>
+                {% else %}
+                  <span class="badge badge--muted">Nao</span>
+                {% endif %}
+              </td>
+              <td class="mono-cell">{{ foto.cadastrado_em.strftime("%d/%m/%Y %H:%M") if foto.cadastrado_em else "-" }}</td>
+              <td class="mono-cell">{{ foto.operador_nome }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <!-- PAGINACAO -->
+        {% if total_pages > 1 %}
+        <div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--text-tertiary)">Pagina {{ page }} de {{ total_pages }} — {{ total }} registro(s)</span>
+          <div style="display:flex;gap:8px">
+            {% if page > 1 %}
+            <a href="/photos?page={{ page - 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Anterior</a>
+            {% endif %}
+            {% if page < total_pages %}
+            <a href="/photos?page={{ page + 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Proxima</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="padding:48px;text-align:center;color:var(--text-tertiary)">
+          <div style="font-size:13px">Nenhuma foto encontrada.</div>
+          {% if filtros.nome or filtros.sexo or filtros.etnia_cor or filtros.grau_confiabilidade or filtros.sinais_particulares %}
+          <div style="margin-top:8px"><a href="/photos" class="btn-text">Limpar filtros</a></div>
+          {% else %}
+          <div style="margin-top:8px"><a href="/photos/new" class="btn-text">Cadastrar primeira foto</a></div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Banco de Fotos</span>
+  </div>
+</div>
+{% endblock %}

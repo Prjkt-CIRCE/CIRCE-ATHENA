@@ -1,30 +1,27 @@
 import os
-import sys
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.models.operator import Operator, AuditLog, SyncQueue  # registra modelos
+from app.models.operator import Operator, AuditLog, SyncQueue
+from app.models.photo import Photo
 from app.middleware.auth_guard import AuthGuard
 from app.routes.auth import router as auth_router
 from app.routes.web import router as web_router
+from app.routes.photos import router as photos_router
 
-# Cria tabelas se nao existirem
+# Cria tabelas novas que ainda nao existam (backup ao Alembic)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="CIRCE Athena", docs_url=None, redoc_url=None)
 
-# ORDEM IMPORTA: middlewares sao aplicados de baixo para cima.
-# AuthGuard precisa que a sessao ja esteja disponivel,
-# entao SessionMiddleware deve ser adicionado DEPOIS do AuthGuard.
 app.add_middleware(AuthGuard)
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, max_age=settings.session_hours * 3600)
 
-# Rotas
 app.include_router(auth_router)
 app.include_router(web_router)
-
+app.include_router(photos_router)
 
 if __name__ == "__main__":
     print("=" * 52)
@@ -38,7 +35,6 @@ if __name__ == "__main__":
     print("=" * 52)
     print("  Ctrl+C para encerrar")
     print()
-
     uvicorn.run(
         "run:app",
         host=settings.host,

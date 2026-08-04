@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/platea"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <div class="main-area">
+    <div class="page-header">
+      <span class="page-header__title">Banco de Fotos</span>
+      <span class="page-header__subtitle">Comparacao facial</span>
+      <div class="page-header__spacer"></div>
+      <a href="/photos" class="btn-secondary" style="text-decoration:none;font-size:13px">Voltar ao Banco</a>
+      <div class="page-header__divider"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="alert alert--warning" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <div>
+          <strong>SUGESTOES AUTOMATICAS — PENDENTES DE VALIDACAO HUMANA OBRIGATORIA.</strong><br>
+          <span style="font-size:12px">Os resultados abaixo NAO constituem identificacao. Cada candidato deve ser individualmente confirmado ou rejeitado pelo operador. A decisao e registrada no log de auditoria.</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-label">Imagem de consulta</div>
+        <form method="post" action="/photos/compare" enctype="multipart/form-data">
+          <div style="display:flex;gap:12px;align-items:flex-end">
+            <div style="flex:1">
+              <label class="form-label">Foto do suspeito <span class="req">*</span></label>
+              <input type="file" name="foto_consulta" accept=".jpg,.jpeg,.png,.bmp,.webp" required class="form-input" style="padding:7px 12px;cursor:pointer">
+              <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">JPG, PNG, BMP, WEBP. Max 20 MB. Retorna ate 5 candidatos mais similares.</div>
+            </div>
+            <button type="submit" class="btn-primary" style="white-space:nowrap;margin-bottom:1px">Comparar</button>
+          </div>
+        </form>
+      </div>
+
+      {% if error %}
+      <div class="alert alert--error">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="8" r="7"/><path d="M8 5v4M8 10.5v.5"/></svg>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      {% if aviso and not error %}
+      <div class="alert alert--info">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><circle cx="8" cy="8" r="7"/><path d="M8 7v5M8 5v.5"/></svg>
+        {{ aviso }}
+      </div>
+      {% endif %}
+
+      {% if candidatos is not none %}
+        {% if candidatos %}
+        <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <span style="font-size:15px;font-weight:600">{{ candidatos|length }} candidato(s) encontrado(s)</span>
+            {% if query_hash %}
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-left:12px">SHA256 consulta: {{ query_hash }}...</span>
+            {% endif %}
+          </div>
+          <span style="font-size:11px;color:var(--text-tertiary)">Validacao obrigatoria para cada candidato</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          {% for item in candidatos %}
+          {% set foto = item.photo %}
+          {% set score = item.score %}
+          {% set score_pct = (score * 100)|int %}
+          <div class="card" id="candidato-{{ loop.index }}" style="border-left:3px solid {% if score_pct >= 80 %}var(--error){% elif score_pct >= 60 %}var(--warning){% else %}var(--border-strong){% endif %}">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary)">#{{ loop.index }}</span>
+                <span style="font-size:15px;font-weight:600">{{ foto.nome_completo }}</span>
+                {% if foto.alcunhas %}<span style="font-size:12px;color:var(--text-tertiary)">({{ foto.alcunhas }})</span>{% endif %}
+              </div>
+              <div style="display:flex;align-items:center;gap:16px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:120px;height:6px;background:var(--bg-base);border-radius:3px;overflow:hidden">
+                    <div style="width:{{ score_pct }}%;height:100%;background:{% if score_pct >= 80 %}var(--error){% elif score_pct >= 60 %}var(--warning){% else %}var(--success){% endif %};border-radius:3px"></div>
+                  </div>
+                  <span style="font-family:var(--font-mono);font-size:12px;font-weight:500;color:{% if score_pct >= 80 %}var(--error){% elif score_pct >= 60 %}var(--warning){% else %}var(--text-secondary){% endif %}">{{ score_pct }}%</span>
+                </div>
+                <div style="display:flex;gap:8px" id="btns-{{ loop.index }}">
+                  <button onclick="validar({{ foto.id }}, 'confirmado', {{ score }}, '{{ query_hash }}', {{ loop.index }})" class="btn-primary" style="font-size:12px;padding:6px 14px;background:var(--success)">&#10003; Confirmar</button>
+                  <button onclick="validar({{ foto.id }}, 'rejeitado', {{ score }}, '{{ query_hash }}', {{ loop.index }})" class="btn-secondary" style="font-size:12px;padding:6px 14px;color:var(--error);border-color:var(--error)">&#10007; Rejeitar</button>
+                </div>
+                <div id="decisao-{{ loop.index }}" style="display:none;font-family:var(--font-mono);font-size:11px;font-weight:600"></div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:start">
+              <div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px;font-family:var(--font-mono)">CADASTRO NO BANCO</div>
+                <img src="/photos/media/{{ foto.id }}" alt="Foto {{ foto.id }}" style="width:180px;height:180px;object-fit:cover;border-radius:3px;border:1px solid var(--border-subtle);background:var(--bg-base)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div style="display:none;width:180px;height:180px;border-radius:3px;border:1px solid var(--border-subtle);background:var(--bg-base);align-items:center;justify-content:center;color:var(--text-tertiary);font-size:11px">Imagem indisponivel</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px">
+                <div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">SEXO</div><div style="font-size:13px">{{ foto.sexo }}</div></div>
+                <div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">ETNIA/COR</div><div style="font-size:13px">{{ foto.etnia_cor }}</div></div>
+                {% if foto.data_nascimento %}<div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">NASCIMENTO</div><div style="font-size:13px">{{ foto.data_nascimento }}</div></div>{% endif %}
+                {% if foto.cpf %}<div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">CPF</div><div style="font-size:13px;font-family:var(--font-mono)">{{ foto.cpf }}</div></div>{% endif %}
+                {% if foto.estatura %}<div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">ESTATURA</div><div style="font-size:13px">{{ foto.estatura }}</div></div>{% endif %}
+                {% if foto.compleicao %}<div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">COMPLEICAO</div><div style="font-size:13px">{{ foto.compleicao }}</div></div>{% endif %}
+                {% if foto.sinais_particulares %}<div style="grid-column:span 2"><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">SINAIS PARTICULARES</div><div style="font-size:13px">{{ foto.sinais_particulares }}</div></div>{% endif %}
+                {% if foto.caso_vinculado %}<div style="grid-column:span 2"><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">CASO VINCULADO</div><div style="font-size:13px">{{ foto.caso_vinculado }}</div></div>{% endif %}
+                <div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">CONTEXTO</div><div><span class="badge badge--muted">{{ foto.contexto_foto }}</span></div></div>
+                <div><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">CONFIABILIDADE</div><div>{% if foto.grau_confiabilidade == "Alto" %}<span class="badge badge--success">Alto</span>{% elif foto.grau_confiabilidade == "Medio" %}<span class="badge badge--warning">Medio</span>{% else %}<span class="badge badge--error">Baixo</span>{% endif %}</div></div>
+                <div style="grid-column:span 2"><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">FONTE</div><div style="font-size:12px;color:var(--text-secondary)">{{ foto.fonte }}</div></div>
+                <div style="grid-column:span 2"><div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);margin-bottom:2px">CADASTRADO EM</div><div style="font-size:12px;font-family:var(--font-mono)">{{ foto.cadastrado_em.strftime("%d/%m/%Y %H:%M") if foto.cadastrado_em else "-" }} por {{ foto.operador_nome }}</div></div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="card" style="text-align:center;padding:48px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:8px">Nenhum candidato encontrado</div>
+          <div style="font-size:13px;color:var(--text-tertiary)">Nenhuma foto no banco atingiu o limiar minimo de similaridade (40%).</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-top:8px">Isso pode indicar que o individuo nao esta cadastrado ou que a qualidade da imagem e insuficiente.</div>
+        </div>
+        {% endif %}
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Banco de Fotos — Comparacao</span>
+  </div>
+</div>
+
+<script>
+async function validar(photoId, decisao, score, queryHash, idx) {
+  const btns = document.getElementById('btns-' + idx);
+  const decisaoEl = document.getElementById('decisao-' + idx);
+  const card = document.getElementById('candidato-' + idx);
+  btns.style.display = 'none';
+  try {
+    const resp = await fetch('/photos/compare/validate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({photo_id: photoId, decisao: decisao, query_hash: queryHash, score: score})
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      decisaoEl.style.display = 'block';
+      if (decisao === 'confirmado') {
+        decisaoEl.textContent = 'CONFIRMADO';
+        decisaoEl.style.color = 'var(--success)';
+        card.style.borderLeftColor = 'var(--success)';
+      } else {
+        decisaoEl.textContent = 'REJEITADO';
+        decisaoEl.style.color = 'var(--error)';
+        card.style.opacity = '0.5';
+      }
+    } else {
+      btns.style.display = 'flex';
+      alert('Erro: ' + (data.error || 'desconhecido'));
+    }
+  } catch(e) {
+    btns.style.display = 'flex';
+    alert('Erro de conexao.');
+  }
+}
+</script>
+{% endblock %}
