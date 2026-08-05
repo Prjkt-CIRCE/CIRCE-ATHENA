@@ -1,13 +1,16 @@
 import os
-import shutil
 import tempfile
 from fastapi import APIRouter, Request, UploadFile, File, Form
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from app.database import SessionLocal
 from app.models.operator import Operator
 from app.models.photo import Photo
-from app.services.photo_service import cadastrar_foto, buscar_fotos, comparar_foto
+from app.services.photo_service import (
+    cadastrar_foto, buscar_fotos, comparar_foto,
+    atualizar_foto, aprovar_foto, descartar_foto,
+    MOTIVOS_DESCARTE,
+)
 from app.services.audit_service import log_action
 
 router = APIRouter(prefix="/photos")
@@ -17,18 +20,7 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
 
 
-def _get_operator_obj(request: Request) -> Operator | None:
-    op = request.session.get("operator")
-    if not op:
-        return None
-    db = SessionLocal()
-    try:
-        return db.query(Operator).filter(Operator.id == op["id"]).first()
-    finally:
-        db.close()
-
-
-# ── LISTAGEM ────────────────────────────────────────────────────────────────
+# -- LISTAGEM ------------------------------------------------------------------
 
 @router.get("", response_class=HTMLResponse)
 async def photos_list(
@@ -38,6 +30,8 @@ async def photos_list(
     etnia_cor: str = "",
     grau_confiabilidade: str = "",
     sinais_particulares: str = "",
+    pendente: str = "",
+    descartados: str = "",
     page: int = 1,
 ):
     operator = request.session.get("operator", {})
@@ -52,6 +46,8 @@ async def photos_list(
             etnia_cor=etnia_cor or None,
             grau_confiabilidade=grau_confiabilidade or None,
             sinais_particulares=sinais_particulares or None,
+            pendente_revisao=pendente == "1",
+            incluir_descartados=descartados == "1",
             limit=limit,
             offset=offset,
         )
@@ -69,13 +65,15 @@ async def photos_list(
                 "etnia_cor": etnia_cor,
                 "grau_confiabilidade": grau_confiabilidade,
                 "sinais_particulares": sinais_particulares,
+                "pendente": pendente,
+                "descartados": descartados,
             },
         })
     finally:
         db.close()
 
 
-# ── CADASTRO ─────────────────────────────────────────────────────────────────
+# -- CADASTRO ------------------------------------------------------------------
 
 @router.get("/new", response_class=HTMLResponse)
 async def photos_new_form(request: Request):
@@ -162,7 +160,7 @@ async def photos_new_submit(
         embedding_msg = (
             "Embedding facial extraido."
             if photo.embedding_path
-            else "Nenhuma face detectada — embedding nao gerado. Registro salvo."
+            else "Nenhuma face detectada -- embedding nao gerado. Registro salvo."
         )
         return templates.TemplateResponse("photos_new.html", {
             "request": request,
@@ -180,11 +178,11 @@ async def photos_new_submit(
             pass
 
 
-# ── MIDIA (serve arquivos de imagem do banco) ────────────────────────────────
+# -- MIDIA ---------------------------------------------------------------------
+# DEVE vir antes de /{photo_id} para nao ser capturada como ID
 
 @router.get("/media/{photo_id}")
 async def photo_media(photo_id: int, request: Request):
-    """Serve o arquivo de imagem de uma foto cadastrada."""
     db = SessionLocal()
     try:
         photo = db.query(Photo).filter(Photo.id == photo_id).first()
@@ -204,7 +202,8 @@ async def photo_media(photo_id: int, request: Request):
         db.close()
 
 
-# ── COMPARACAO ───────────────────────────────────────────────────────────────
+# -- COMPARACAO ----------------------------------------------------------------
+# DEVE vir antes de /{photo_id}
 
 @router.get("/compare", response_class=HTMLResponse)
 async def photos_compare_form(request: Request):
@@ -288,15 +287,11 @@ async def photos_compare_submit(
             pass
 
 
-# ── VALIDACAO DE CANDIDATO ───────────────────────────────────────────────────
+# -- VALIDACAO DE CANDIDATO ----------------------------------------------------
+# DEVE vir antes de /{photo_id}
 
 @router.post("/compare/validate")
 async def photos_compare_validate(request: Request):
-    """
-    Registra decisao de validacao/rejeicao de candidato no audit log.
-    Body JSON: {photo_id, decisao, query_hash, score}
-    decisao: "confirmado" | "rejeitado"
-    """
     operator_session = request.session.get("operator", {})
     body = await request.json()
 
@@ -335,6 +330,194 @@ async def photos_compare_validate(request: Request):
             manage_transaction=True,
         )
         return JSONResponse({"ok": True, "decisao": decisao})
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+    finally:
+        db.close()
+
+
+# -- ACOES EM MASSA ------------------------------------------------------------
+# DEVE vir antes de /{photo_id}
+
+@router.post("/bulk-action")
+async def bulk_action(request: Request):
+    operator_session = request.session.get("operator", {})
+    body = await request.json()
+
+    acao = body.get("acao")
+    ids = body.get("ids", [])
+    motivo = body.get("motivo", "")
+
+    if acao not in ("aprovar", "descartar"):
+        return JSONResponse({"ok": False, "error": "Acao invalida."}, status_code=400)
+    if not ids:
+        return JSONResponse({"ok": False, "error": "Nenhum registro selecionado."}, status_code=400)
+    if acao == "descartar" and not motivo:
+        return JSONResponse({"ok": False, "error": "Motivo obrigatorio para descarte."}, status_code=400)
+
+    db = SessionLocal()
+    try:
+        operador = db.query(Operator).filter(
+            Operator.id == operator_session.get("id")
+        ).first()
+        if not operador:
+            return JSONResponse({"ok": False, "error": "Sessao invalida."}, status_code=401)
+
+        processados = 0
+        erros = []
+
+        for photo_id in ids:
+            try:
+                photo = db.query(Photo).filter(Photo.id == photo_id).first()
+                if not photo:
+                    erros.append(f"ID #{photo_id} nao encontrado")
+                    continue
+                if acao == "aprovar":
+                    aprovar_foto(db=db, photo=photo, operador=operador, commit=False)
+                else:
+                    descartar_foto(db=db, photo=photo, operador=operador, motivo=motivo, commit=False)
+                processados += 1
+            except Exception as e:
+                erros.append(f"ID #{photo_id}: {str(e)}")
+
+        db.commit()
+        return JSONResponse({"ok": True, "processados": processados, "erros": erros})
+    except Exception as e:
+        db.rollback()
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+    finally:
+        db.close()
+
+
+# -- DETALHE / EDICAO ----------------------------------------------------------
+# /{photo_id} SEMPRE POR ULTIMO
+
+@router.get("/{photo_id}", response_class=HTMLResponse)
+async def photo_detail(request: Request, photo_id: int):
+    operator_session = request.session.get("operator", {})
+    db = SessionLocal()
+    try:
+        photo = db.query(Photo).filter(Photo.id == photo_id).first()
+        if not photo:
+            from fastapi.responses import Response
+            return Response(status_code=404)
+        return templates.TemplateResponse("photos_detail.html", {
+            "request": request,
+            "operator": operator_session,
+            "photo": photo,
+            "motivos_descarte": MOTIVOS_DESCARTE,
+            "success": None,
+            "error": None,
+        })
+    finally:
+        db.close()
+
+
+@router.post("/{photo_id}", response_class=HTMLResponse)
+async def photo_detail_submit(
+    request: Request,
+    photo_id: int,
+    nome_completo: str = Form(...),
+    sexo: str = Form(...),
+    etnia_cor: str = Form(...),
+    contexto_foto: str = Form(...),
+    fonte: str = Form(...),
+    grau_confiabilidade: str = Form(...),
+    alcunhas: str = Form(""),
+    cpf: str = Form(""),
+    data_nascimento: str = Form(""),
+    estatura: str = Form(""),
+    compleicao: str = Form(""),
+    sinais_particulares: str = Form(""),
+    caso_vinculado: str = Form(""),
+    observacoes: str = Form(""),
+):
+    operator_session = request.session.get("operator", {})
+    db = SessionLocal()
+    photo = None
+    try:
+        photo = db.query(Photo).filter(Photo.id == photo_id).first()
+        if not photo:
+            from fastapi.responses import Response
+            return Response(status_code=404)
+
+        operador = db.query(Operator).filter(
+            Operator.id == operator_session.get("id")
+        ).first()
+        if not operador:
+            return templates.TemplateResponse("photos_detail.html", {
+                "request": request,
+                "operator": operator_session,
+                "photo": photo,
+                "motivos_descarte": MOTIVOS_DESCARTE,
+                "success": None,
+                "error": "Sessao invalida.",
+            })
+
+        atualizar_foto(
+            db=db, photo=photo, operador=operador,
+            nome_completo=nome_completo.strip(),
+            sexo=sexo, etnia_cor=etnia_cor,
+            contexto_foto=contexto_foto,
+            fonte=fonte.strip(),
+            grau_confiabilidade=grau_confiabilidade,
+            alcunhas=alcunhas.strip() or None,
+            cpf=cpf.strip() or None,
+            data_nascimento=data_nascimento or None,
+            estatura=estatura or None,
+            compleicao=compleicao or None,
+            sinais_particulares=sinais_particulares.strip() or None,
+            caso_vinculado=caso_vinculado.strip() or None,
+            observacoes=observacoes.strip() or None,
+        )
+        return templates.TemplateResponse("photos_detail.html", {
+            "request": request,
+            "operator": operator_session,
+            "photo": photo,
+            "motivos_descarte": MOTIVOS_DESCARTE,
+            "success": "Registro atualizado com sucesso.",
+            "error": None,
+        })
+    except Exception as e:
+        return templates.TemplateResponse("photos_detail.html", {
+            "request": request,
+            "operator": operator_session,
+            "photo": photo,
+            "motivos_descarte": MOTIVOS_DESCARTE,
+            "success": None,
+            "error": f"Erro ao salvar: {str(e)}",
+        })
+    finally:
+        db.close()
+
+
+# -- DESCARTE INDIVIDUAL -------------------------------------------------------
+# DEVE vir antes de /{photo_id} — mas tem segmento fixo "descartar" no path
+# FastAPI resolve corretamente pois o path e /{photo_id}/descartar
+
+@router.post("/{photo_id}/descartar")
+async def photo_descartar(request: Request, photo_id: int):
+    operator_session = request.session.get("operator", {})
+    body = await request.json()
+    motivo = body.get("motivo", "")
+
+    if not motivo:
+        return JSONResponse({"ok": False, "error": "Motivo obrigatorio."}, status_code=400)
+
+    db = SessionLocal()
+    try:
+        operador = db.query(Operator).filter(
+            Operator.id == operator_session.get("id")
+        ).first()
+        if not operador:
+            return JSONResponse({"ok": False, "error": "Sessao invalida."}, status_code=401)
+
+        photo = db.query(Photo).filter(Photo.id == photo_id).first()
+        if not photo:
+            return JSONResponse({"ok": False, "error": "Registro nao encontrado."}, status_code=404)
+
+        descartar_foto(db=db, photo=photo, operador=operador, motivo=motivo)
+        return JSONResponse({"ok": True, "redirect": "/photos"})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
     finally:

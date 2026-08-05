@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/photos/compare"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3"/><circle cx="11" cy="8" r="3"/><path d="M8 5v6" stroke-dasharray="2 1"/></svg>Comparar Foto</a>
+      <a href="/platea"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <!-- AREA PRINCIPAL -->
+  <div class="main-area">
+    <div class="page-header">
+      <a href="/photos" style="color:var(--text-tertiary);text-decoration:none;font-size:12px;margin-right:8px">&#8592; Banco de Fotos</a>
+      <span class="page-header__title">Registro #{{ photo.id }}</span>
+      <span class="page-header__subtitle">
+        {% if photo.status == "descartado" %}
+          <span style="color:var(--text-tertiary)">DESCARTADO</span>
+        {% elif photo.importado_em_lote and not photo.revisado_em %}
+          <span style="color:var(--warning, #c8a000)">PENDENTE DE REVISAO</span>
+        {% elif photo.revisado_em %}
+          <span style="color:var(--success, #3a7d44)">REVISADO</span>
+        {% else %}
+          <span style="color:var(--text-secondary)">OK</span>
+        {% endif %}
+      </span>
+      <div class="page-header__spacer"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      {% if photo.status == "descartado" %}
+      <div class="alert alert--error" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <span>Registro descartado em {{ photo.descartado_em.strftime("%d/%m/%Y %H:%M") if photo.descartado_em else "?" }} por {{ photo.descartado_por or "?" }} &mdash; Motivo: <strong>{{ photo.motivo_descarte or "nao informado" }}</strong></span>
+      </div>
+      {% endif %}
+
+      {% if success %}
+      <div class="alert alert--success" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M2 8l4 4 8-8"/></svg>
+        <span>{{ success }}</span>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="alert alert--error" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start">
+
+        <!-- COLUNA ESQUERDA: foto + metadados de auditoria -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card" style="padding:0;overflow:hidden">
+            {% if photo.caminho_foto %}
+            <img src="/photos/media/{{ photo.id }}"
+                 alt="Foto #{{ photo.id }}"
+                 style="width:100%;display:block;object-fit:cover;max-height:320px;background:var(--bg-subtle)">
+            {% else %}
+            <div style="width:100%;height:200px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px">Sem imagem</div>
+            {% endif %}
+            <div style="padding:12px">
+              <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">SHA-256</div>
+              <div class="mono-cell" style="font-size:10px;word-break:break-all;color:var(--text-secondary)">{{ photo.sha256_foto }}</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-label">Auditoria</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+              <div><span style="color:var(--text-tertiary)">Cadastrado em</span><br><span class="mono-cell">{{ photo.cadastrado_em.strftime("%d/%m/%Y %H:%M") if photo.cadastrado_em else "-" }}</span></div>
+              <div><span style="color:var(--text-tertiary)">Operador</span><br><span>{{ photo.operador_nome }}</span></div>
+              <div><span style="color:var(--text-tertiary)">Importado em lote</span><br><span>{{ "Sim" if photo.importado_em_lote else "Nao" }}</span></div>
+              <div><span style="color:var(--text-tertiary)">Revisado em</span><br><span class="mono-cell">{{ photo.revisado_em.strftime("%d/%m/%Y %H:%M") if photo.revisado_em else "Pendente" }}</span></div>
+              <div><span style="color:var(--text-tertiary)">Embedding</span><br>
+                {% if photo.embedding_path %}<span style="color:var(--success,#3a7d44)">Extraido ({{ photo.embedding_model or "?" }})</span>
+                {% else %}<span style="color:var(--text-tertiary)">Nao gerado</span>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          {% if photo.status != "descartado" %}
+          <button type="button" class="btn-secondary" style="width:100%;color:var(--error,#b94040)"
+            onclick="document.getElementById('modal-descarte').style.display='flex'">
+            Descartar registro
+          </button>
+          {% endif %}
+        </div>
+
+        <!-- COLUNA DIREITA: formulario de edicao -->
+        <div class="card">
+          <div class="section-label" style="margin-bottom:16px">Metadados do registro</div>
+
+          {% if photo.status == "descartado" %}
+          <div style="padding:24px;text-align:center;color:var(--text-tertiary);font-size:13px">
+            Registro descartado. Edicao desabilitada.
+          </div>
+          {% else %}
+          <form method="post" action="/photos/{{ photo.id }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+              <div style="grid-column:1/-1">
+                <label class="form-label">Nome completo <span style="color:var(--error,#b94040)">*</span></label>
+                <input type="text" name="nome_completo" value="{{ photo.nome_completo }}" required class="form-input">
+              </div>
+
+              <div>
+                <label class="form-label">Alcunhas / apelidos</label>
+                <input type="text" name="alcunhas" value="{{ photo.alcunhas or '' }}" class="form-input">
+              </div>
+
+              <div>
+                <label class="form-label">CPF</label>
+                <input type="text" name="cpf" value="{{ photo.cpf or '' }}" class="form-input" placeholder="Somente numeros">
+              </div>
+
+              <div>
+                <label class="form-label">Data de nascimento</label>
+                <input type="date" name="data_nascimento" value="{{ photo.data_nascimento or '' }}" class="form-input">
+              </div>
+
+              <div>
+                <label class="form-label">Sexo <span style="color:var(--error,#b94040)">*</span></label>
+                <select name="sexo" required class="form-input">
+                  <option value="Masculino" {% if photo.sexo == "Masculino" %}selected{% endif %}>Masculino</option>
+                  <option value="Feminino" {% if photo.sexo == "Feminino" %}selected{% endif %}>Feminino</option>
+                  <option value="Nao identificado" {% if photo.sexo == "Nao identificado" %}selected{% endif %}>Nao identificado</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Etnia / cor <span style="color:var(--error,#b94040)">*</span></label>
+                <select name="etnia_cor" required class="form-input">
+                  <option value="Branca" {% if photo.etnia_cor == "Branca" %}selected{% endif %}>Branca</option>
+                  <option value="Preta" {% if photo.etnia_cor == "Preta" %}selected{% endif %}>Preta</option>
+                  <option value="Parda" {% if photo.etnia_cor == "Parda" %}selected{% endif %}>Parda</option>
+                  <option value="Amarela" {% if photo.etnia_cor == "Amarela" %}selected{% endif %}>Amarela</option>
+                  <option value="Indigena" {% if photo.etnia_cor == "Indigena" %}selected{% endif %}>Indigena</option>
+                  <option value="Nao identificada" {% if photo.etnia_cor == "Nao identificada" %}selected{% endif %}>Nao identificada</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Estatura</label>
+                <select name="estatura" class="form-input">
+                  <option value="">Nao informada</option>
+                  {% for op in ["Baixa (ate 1,60m)", "Media (1,60m a 1,75m)", "Alta (acima de 1,75m)"] %}
+                  <option value="{{ op }}" {% if photo.estatura == op %}selected{% endif %}>{{ op }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Compleicao</label>
+                <select name="compleicao" class="form-input">
+                  <option value="">Nao informada</option>
+                  {% for op in ["Magro", "Medio", "Robusto", "Obeso"] %}
+                  <option value="{{ op }}" {% if photo.compleicao == op %}selected{% endif %}>{{ op }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div style="grid-column:1/-1">
+                <label class="form-label">Sinais particulares</label>
+                <textarea name="sinais_particulares" class="form-input" rows="2" placeholder="Tatuagens, cicatrizes, marcas...">{{ photo.sinais_particulares or '' }}</textarea>
+              </div>
+
+              <div>
+                <label class="form-label">Contexto da foto <span style="color:var(--error,#b94040)">*</span></label>
+                <select name="contexto_foto" required class="form-input">
+                  {% for op in ["Flagrante", "Diligencia", "Camera de segurança", "Midia social", "Documento oficial", "Parceiro institucional", "Outro"] %}
+                  <option value="{{ op }}" {% if photo.contexto_foto == op %}selected{% endif %}>{{ op }}</option>
+                  {% endfor %}
+                  <option value="[IMPORTADO_LOTE]" {% if photo.contexto_foto == "[IMPORTADO_LOTE]" %}selected{% endif %}>[IMPORTADO_LOTE]</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label">Grau de confiabilidade <span style="color:var(--error,#b94040)">*</span></label>
+                <select name="grau_confiabilidade" required class="form-input">
+                  {% for op in ["Alto", "Medio", "Baixo"] %}
+                  <option value="{{ op }}" {% if photo.grau_confiabilidade == op %}selected{% endif %}>{{ op }}</option>
+                  {% endfor %}
+                  <option value="nao_verificada" {% if photo.grau_confiabilidade == "nao_verificada" %}selected{% endif %}>Nao verificada</option>
+                </select>
+              </div>
+
+              <div style="grid-column:1/-1">
+                <label class="form-label">Fonte / procedencia <span style="color:var(--error,#b94040)">*</span></label>
+                <input type="text" name="fonte" value="{{ photo.fonte }}" required class="form-input">
+              </div>
+
+              <div style="grid-column:1/-1">
+                <label class="form-label">Caso vinculado</label>
+                <input type="text" name="caso_vinculado" value="{{ photo.caso_vinculado or '' }}" class="form-input" placeholder="Numero do BO ou identificador do caso">
+              </div>
+
+              <div style="grid-column:1/-1">
+                <label class="form-label">Observacoes</label>
+                <textarea name="observacoes" class="form-input" rows="3">{{ photo.observacoes or '' }}</textarea>
+              </div>
+
+            </div>
+
+            <div style="margin-top:20px;display:flex;gap:12px;justify-content:flex-end">
+              <a href="/photos" class="btn-secondary">Cancelar</a>
+              <button type="submit" class="btn-primary">Salvar alteracoes</button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Registro #{{ photo.id }}</span>
+  </div>
+</div>
+
+<!-- MODAL DESCARTE -->
+<div id="modal-descarte" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+  <div class="card" style="width:420px;max-width:90vw;padding:24px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px">Descartar registro #{{ photo.id }}</div>
+    <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:20px">
+      O registro sera desativado e removido da listagem padrao. Permanece no banco e no audit log.
+    </div>
+    <label class="form-label">Motivo <span style="color:var(--error,#b94040)">*</span></label>
+    <select id="select-motivo" class="form-input" style="margin-bottom:16px">
+      <option value="">Selecione o motivo...</option>
+      {% for m in motivos_descarte %}
+      <option value="{{ m }}">{{ m }}</option>
+      {% endfor %}
+    </select>
+    <div style="display:flex;gap:12px;justify-content:flex-end">
+      <button type="button" class="btn-secondary" onclick="document.getElementById('modal-descarte').style.display='none'">Cancelar</button>
+      <button type="button" class="btn-primary" style="background:var(--error,#b94040);border-color:var(--error,#b94040)" onclick="confirmarDescarte()">Confirmar descarte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmarDescarte() {
+  const motivo = document.getElementById('select-motivo').value;
+  if (!motivo) { alert('Selecione um motivo.'); return; }
+  fetch('/photos/{{ photo.id }}/descartar', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({motivo})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) window.location.href = '/photos';
+    else alert('Erro: ' + d.error);
+  });
+}
+</script>
+{% endblock %}

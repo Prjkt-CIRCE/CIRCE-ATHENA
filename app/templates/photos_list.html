@@ -11,6 +11,7 @@
     <div class="sidebar__nav">
       <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
       <a href="/photos" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/photos/compare"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3"/><circle cx="11" cy="8" r="3"/><path d="M8 5v6" stroke-dasharray="2 1"/></svg>Comparar Foto</a>
       <a href="/platea"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
       <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
       <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
@@ -25,7 +26,11 @@
   <div class="main-area">
     <div class="page-header">
       <span class="page-header__title">Banco de Fotos</span>
-      <span class="page-header__subtitle">{{ total }} registro(s)</span>
+      <span class="page-header__subtitle">
+        {{ total }} registro(s)
+        {% if filtros.pendente == "1" %}&mdash; <span style="color:var(--accent)">pendentes</span>{% endif %}
+        {% if filtros.descartados == "1" %}&mdash; <span style="color:var(--text-tertiary)">incl. descartados</span>{% endif %}
+      </span>
       <div class="page-header__spacer"></div>
       <a href="/photos/new" class="btn-primary" style="text-decoration:none;font-size:13px;padding:7px 16px">+ Cadastrar Foto</a>
       <div class="page-header__divider"></div>
@@ -51,7 +56,7 @@
       </div>
 
       <!-- FILTROS -->
-      <form method="get" action="/photos" style="margin-bottom:20px">
+      <form method="get" action="/photos" id="form-filtros" style="margin-bottom:20px">
         <div class="card">
           <div class="section-label">Filtros de busca</div>
           <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 2fr auto;gap:12px;align-items:flex-end">
@@ -98,42 +103,94 @@
               <a href="/photos" class="btn-secondary" style="white-space:nowrap">Limpar</a>
             </div>
           </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" name="pendente" value="1" {% if filtros.pendente == "1" %}checked{% endif %}
+                onchange="document.getElementById('form-filtros').submit()"
+                style="accent-color:var(--accent);width:14px;height:14px">
+              Apenas <strong>pendentes de revisao</strong>
+            </label>
+            <label style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer">
+              <input type="checkbox" name="descartados" value="1" {% if filtros.descartados == "1" %}checked{% endif %}
+                onchange="document.getElementById('form-filtros').submit()"
+                style="accent-color:var(--accent);width:14px;height:14px">
+              Incluir <strong>descartados</strong>
+            </label>
+          </div>
         </div>
       </form>
+
+      <!-- BARRA DE ACOES EM MASSA (oculta ate selecao) -->
+      <div id="barra-massa" style="display:none;margin-bottom:12px">
+        <div class="card" style="padding:10px 16px;display:flex;align-items:center;gap:16px;background:var(--bg-subtle)">
+          <span id="label-selecionados" style="font-size:13px;font-weight:500;color:var(--accent)">0 selecionados</span>
+          <div style="display:flex;gap:8px;margin-left:auto">
+            <button type="button" class="btn-secondary" style="font-size:12px;padding:5px 14px" onclick="acaoEmMassa('aprovar')">
+              Aprovar selecionados
+            </button>
+            <button type="button" class="btn-secondary" style="font-size:12px;padding:5px 14px;color:var(--error,#b94040)" onclick="abrirModalDescarteMassa()">
+              Descartar selecionados
+            </button>
+            <button type="button" class="btn-text" style="font-size:12px" onclick="limparSelecao()">Cancelar</button>
+          </div>
+        </div>
+      </div>
 
       <!-- TABELA -->
       <div class="card" style="padding:0;overflow:hidden">
         {% if fotos %}
-        <table class="data-table">
+        <table class="data-table" id="tabela-fotos">
           <thead>
             <tr>
+              <th style="width:36px;padding:10px 8px">
+                <input type="checkbox" id="check-todos" onchange="toggleTodos(this)"
+                  style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer">
+              </th>
               <th style="width:48px">ID</th>
+              <th style="width:80px">Status</th>
               <th>Nome</th>
               <th>Sexo</th>
               <th>Etnia/cor</th>
-              <th>Contexto</th>
               <th>Confiabilidade</th>
               <th>Embedding</th>
               <th>Cadastrado em</th>
-              <th>Operador</th>
             </tr>
           </thead>
           <tbody>
             {% for foto in fotos %}
-            <tr>
+            <tr class="row-foto" data-id="{{ foto.id }}"
+              style="cursor:pointer{% if foto.importado_em_lote and not foto.revisado_em %};opacity:0.85{% endif %}"
+              onclick="navegarOuSelecionar(event, {{ foto.id }})">
+              <td style="padding:10px 8px" onclick="event.stopPropagation()">
+                <input type="checkbox" class="check-foto" value="{{ foto.id }}"
+                  onchange="atualizarSelecao()"
+                  style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer">
+              </td>
               <td class="mono-cell">#{{ foto.id }}</td>
+              <td>
+                {% if foto.status == "descartado" %}
+                  <span class="badge badge--muted">DESCARTADO</span>
+                {% elif foto.importado_em_lote and not foto.revisado_em %}
+                  <span class="badge badge--warning">PENDENTE</span>
+                {% elif foto.importado_em_lote and foto.revisado_em %}
+                  <span class="badge badge--success">REVISADO</span>
+                {% else %}
+                  <span class="badge badge--muted">OK</span>
+                {% endif %}
+              </td>
               <td>
                 <div style="font-weight:500">{{ foto.nome_completo }}</div>
                 {% if foto.alcunhas %}<div style="font-size:11px;color:var(--text-tertiary)">{{ foto.alcunhas }}</div>{% endif %}
               </td>
               <td>{{ foto.sexo }}</td>
               <td>{{ foto.etnia_cor }}</td>
-              <td><span class="badge badge--muted">{{ foto.contexto_foto }}</span></td>
               <td>
                 {% if foto.grau_confiabilidade == "Alto" %}
                   <span class="badge badge--success">Alto</span>
                 {% elif foto.grau_confiabilidade == "Medio" %}
                   <span class="badge badge--warning">Medio</span>
+                {% elif foto.grau_confiabilidade == "nao_verificada" %}
+                  <span class="badge badge--muted">N. verif.</span>
                 {% else %}
                   <span class="badge badge--error">Baixo</span>
                 {% endif %}
@@ -146,22 +203,20 @@
                 {% endif %}
               </td>
               <td class="mono-cell">{{ foto.cadastrado_em.strftime("%d/%m/%Y %H:%M") if foto.cadastrado_em else "-" }}</td>
-              <td class="mono-cell">{{ foto.operador_nome }}</td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
 
-        <!-- PAGINACAO -->
         {% if total_pages > 1 %}
         <div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:12px;color:var(--text-tertiary)">Pagina {{ page }} de {{ total_pages }} — {{ total }} registro(s)</span>
+          <span style="font-size:12px;color:var(--text-tertiary)">Pagina {{ page }} de {{ total_pages }} &mdash; {{ total }} registro(s)</span>
           <div style="display:flex;gap:8px">
             {% if page > 1 %}
-            <a href="/photos?page={{ page - 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Anterior</a>
+            <a href="/photos?page={{ page - 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}&pendente={{ filtros.pendente }}&descartados={{ filtros.descartados }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Anterior</a>
             {% endif %}
             {% if page < total_pages %}
-            <a href="/photos?page={{ page + 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Proxima</a>
+            <a href="/photos?page={{ page + 1 }}&nome={{ filtros.nome }}&sexo={{ filtros.sexo }}&etnia_cor={{ filtros.etnia_cor }}&grau_confiabilidade={{ filtros.grau_confiabilidade }}&sinais_particulares={{ filtros.sinais_particulares }}&pendente={{ filtros.pendente }}&descartados={{ filtros.descartados }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Proxima</a>
             {% endif %}
           </div>
         </div>
@@ -170,7 +225,7 @@
         {% else %}
         <div style="padding:48px;text-align:center;color:var(--text-tertiary)">
           <div style="font-size:13px">Nenhuma foto encontrada.</div>
-          {% if filtros.nome or filtros.sexo or filtros.etnia_cor or filtros.grau_confiabilidade or filtros.sinais_particulares %}
+          {% if filtros.nome or filtros.sexo or filtros.etnia_cor or filtros.grau_confiabilidade or filtros.sinais_particulares or filtros.pendente %}
           <div style="margin-top:8px"><a href="/photos" class="btn-text">Limpar filtros</a></div>
           {% else %}
           <div style="margin-top:8px"><a href="/photos/new" class="btn-text">Cadastrar primeira foto</a></div>
@@ -189,6 +244,108 @@
     <span>{{ operator.username if operator else "" }}</span>
     <span class="status-bar__sep">|</span>
     <span>Banco de Fotos</span>
+    {% if filtros.pendente == "1" %}
+    <span class="status-bar__sep">|</span>
+    <span style="color:var(--accent)">FILTRO: PENDENTES</span>
+    {% endif %}
   </div>
 </div>
+
+<!-- MODAL DESCARTE EM MASSA -->
+<div id="modal-descarte-massa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+  <div class="card" style="width:420px;max-width:90vw;padding:24px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px">Descartar registros selecionados</div>
+    <div id="label-massa-modal" style="font-size:12px;color:var(--text-tertiary);margin-bottom:20px"></div>
+    <label class="form-label">Motivo <span style="color:var(--error,#b94040)">*</span></label>
+    <select id="select-motivo-massa" class="form-input" style="margin-bottom:16px">
+      <option value="">Selecione o motivo...</option>
+      <option value="Imagem sem pessoa visivel">Imagem sem pessoa visivel</option>
+      <option value="Imagem duplicada fora do sistema">Imagem duplicada fora do sistema</option>
+      <option value="Qualidade insuficiente para analise">Qualidade insuficiente para analise</option>
+      <option value="Foto irrelevante para o acervo">Foto irrelevante para o acervo</option>
+      <option value="Erro de importacao">Erro de importacao</option>
+      <option value="Outro (ver observacoes)">Outro (ver observacoes)</option>
+    </select>
+    <div style="display:flex;gap:12px;justify-content:flex-end">
+      <button type="button" class="btn-secondary" onclick="document.getElementById('modal-descarte-massa').style.display='none'">Cancelar</button>
+      <button type="button" class="btn-primary" style="background:var(--error,#b94040);border-color:var(--error,#b94040)" onclick="confirmarDescarteMassa()">Confirmar descarte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function getIdsSelecionados() {
+  return Array.from(document.querySelectorAll('.check-foto:checked')).map(c => parseInt(c.value));
+}
+
+function atualizarSelecao() {
+  const ids = getIdsSelecionados();
+  const barra = document.getElementById('barra-massa');
+  const label = document.getElementById('label-selecionados');
+  if (ids.length > 0) {
+    barra.style.display = 'block';
+    label.textContent = ids.length + ' selecionado(s)';
+  } else {
+    barra.style.display = 'none';
+  }
+  const total = document.querySelectorAll('.check-foto').length;
+  document.getElementById('check-todos').indeterminate = ids.length > 0 && ids.length < total;
+  document.getElementById('check-todos').checked = ids.length === total;
+}
+
+function toggleTodos(cb) {
+  document.querySelectorAll('.check-foto').forEach(c => c.checked = cb.checked);
+  atualizarSelecao();
+}
+
+function limparSelecao() {
+  document.querySelectorAll('.check-foto').forEach(c => c.checked = false);
+  document.getElementById('check-todos').checked = false;
+  atualizarSelecao();
+}
+
+function navegarOuSelecionar(event, id) {
+  const ids = getIdsSelecionados();
+  if (ids.length > 0) return; // modo selecao ativo: nao navega
+  window.location.href = '/photos/' + id;
+}
+
+function acaoEmMassa(acao) {
+  const ids = getIdsSelecionados();
+  if (!ids.length) return;
+  fetch('/photos/bulk-action', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({acao, ids})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) window.location.reload();
+    else alert('Erro: ' + d.error);
+  });
+}
+
+function abrirModalDescarteMassa() {
+  const ids = getIdsSelecionados();
+  if (!ids.length) return;
+  document.getElementById('label-massa-modal').textContent = ids.length + ' registro(s) serao descartados. Esta acao nao pode ser desfeita pela interface.';
+  document.getElementById('modal-descarte-massa').style.display = 'flex';
+}
+
+function confirmarDescarteMassa() {
+  const motivo = document.getElementById('select-motivo-massa').value;
+  if (!motivo) { alert('Selecione um motivo.'); return; }
+  const ids = getIdsSelecionados();
+  fetch('/photos/bulk-action', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({acao: 'descartar', ids, motivo})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) window.location.reload();
+    else alert('Erro: ' + d.error);
+  });
+}
+</script>
 {% endblock %}
