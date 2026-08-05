@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/photos/compare"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3"/><circle cx="11" cy="8" r="3"/><path d="M8 5v6" stroke-dasharray="2 1"/></svg>Comparar Foto</a>
+      <a href="/platea" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <!-- AREA PRINCIPAL -->
+  <div class="main-area">
+    <div class="page-header">
+      <a href="/platea" class="btn-text" style="font-size:12px;opacity:0.7">&larr; Platea</a>
+      <span class="page-header__title" style="margin-left:8px">{{ case.case_ref }}</span>
+      <span class="page-header__subtitle">{{ case.title }}</span>
+      <div class="page-header__spacer"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- AVISO DE ACESSO REGISTRADO -->
+      <div class="alert alert--warning" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><path d="M8 1L15 14H1L8 1z"/><path d="M8 6v4M8 11.5v.5"/></svg>
+        <span>Este acesso foi registrado no log de auditoria. Os dados abaixo foram publicados voluntariamente pelo operador de origem e nao substituem os registros originais do Intel Desk.</span>
+      </div>
+
+      <!-- CABECALHO DO CASO -->
+      <div class="card mb-4">
+        <div class="section-label">Identificacao do caso</div>
+        <div class="grid-3" style="gap:20px">
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Referencia</div>
+            <div class="mono" style="font-size:15px;font-weight:600;color:var(--accent)">{{ case.case_ref }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Titulo</div>
+            <div style="font-weight:500">{{ case.title }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Status</div>
+            {% if case.status == "aberto" %}
+              <span class="badge badge--success">Aberto</span>
+            {% elif case.status == "arquivado" %}
+              <span class="badge badge--muted">Arquivado</span>
+            {% else %}
+              <span class="badge badge--warning">{{ case.status }}</span>
+            {% endif %}
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Classificacao</div>
+            <div>{{ case.classification or "—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Unidade de origem</div>
+            <div>{{ case.source_unit or "—" }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Publicado por</div>
+            <div class="mono" style="font-size:12px">{{ case.published_by }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Publicado em</div>
+            <div class="mono" style="font-size:12px">{{ case.published_at.strftime("%d/%m/%Y %H:%M") }}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Versao</div>
+            <div class="mono" style="font-size:12px">v{{ case.published_version }}</div>
+          </div>
+          {% if case.last_updated_at %}
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Ultima atualizacao</div>
+            <div class="mono" style="font-size:12px">{{ case.last_updated_at.strftime("%d/%m/%Y %H:%M") }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% if case.notes %}
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle)">
+          <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px">Observacoes</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">{{ case.notes }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- PESSOAS -->
+      <div class="card mb-4">
+        <div class="section-label">Pessoas ({{ persons|length }})</div>
+        {% if persons %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Alcunhas</th>
+              <th>CPF</th>
+              <th>RG</th>
+              <th>Nascimento</th>
+              <th>Papel no caso</th>
+              <th>Confiabilidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in persons %}
+            <tr>
+              <td style="font-weight:500">{{ p.full_name }}</td>
+              <td class="text-secondary">{{ p.aliases or "—" }}</td>
+              <td class="mono-cell">{{ p.cpf or "—" }}</td>
+              <td class="mono-cell">{{ p.rg or "—" }}</td>
+              <td class="mono-cell">{{ p.birth_date or "—" }}</td>
+              <td>{{ p.role_in_case or "—" }}</td>
+              <td>
+                {% if p.reliability_level == "high" or p.reliability_level == "alto" %}
+                  <span class="badge badge--success">Alto</span>
+                {% elif p.reliability_level == "medium" or p.reliability_level == "medio" %}
+                  <span class="badge badge--warning">Medio</span>
+                {% elif p.reliability_level == "low" or p.reliability_level == "baixo" %}
+                  <span class="badge badge--error">Baixo</span>
+                {% else %}
+                  <span class="badge badge--muted">{{ p.reliability_level or "—" }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div style="color:var(--text-tertiary);font-size:13px;padding:12px 0">Nenhuma pessoa compartilhada neste caso.</div>
+        {% endif %}
+      </div>
+
+      <!-- DOCUMENTOS -->
+      <div class="card mb-4">
+        <div class="section-label">Documentos ({{ documents|length }})</div>
+        {% if documents %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Arquivo</th>
+              <th>Tipo</th>
+              <th>Descricao</th>
+              <th>SHA-256</th>
+              <th>Importado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in documents %}
+            <tr>
+              <td style="font-weight:500">{{ d.filename }}</td>
+              <td>
+                {% if d.file_type %}
+                  <span class="badge badge--muted">{{ d.file_type.upper() }}</span>
+                {% else %}—{% endif %}
+              </td>
+              <td class="text-secondary">{{ d.description or "—" }}</td>
+              <td class="mono-cell" style="font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ d.sha256 or '' }}">
+                {{ d.sha256[:16] + "..." if d.sha256 else "—" }}
+              </td>
+              <td class="mono-cell">{{ d.imported_at or "—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div style="color:var(--text-tertiary);font-size:13px;padding:12px 0">Nenhum documento compartilhado neste caso.</div>
+        {% endif %}
+      </div>
+
+      <!-- VINCULOS -->
+      <div class="card">
+        <div class="section-label">Vinculos ({{ links|length }})</div>
+        {% if links %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Entidade A</th>
+              <th>Entidade B</th>
+              <th>Natureza</th>
+              <th>Observacoes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lk in links %}
+            <tr>
+              <td><span class="badge badge--muted">{{ lk.link_type }}</span></td>
+              <td>
+                <div style="font-weight:500">{{ lk.entity_a_name or lk.entity_a_ref }}</div>
+                <div class="mono-cell" style="font-size:10px;color:var(--text-tertiary)">{{ lk.entity_a_ref }}</div>
+              </td>
+              <td>
+                <div style="font-weight:500">{{ lk.entity_b_name or lk.entity_b_ref }}</div>
+                <div class="mono-cell" style="font-size:10px;color:var(--text-tertiary)">{{ lk.entity_b_ref }}</div>
+              </td>
+              <td class="text-secondary">{{ lk.link_nature or "—" }}</td>
+              <td class="text-secondary">{{ lk.notes or "—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div style="color:var(--text-tertiary);font-size:13px;padding:12px 0">Nenhum vinculo compartilhado neste caso.</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Platea &rsaquo; {{ case.case_ref }}</span>
+    <span class="status-bar__sep">|</span>
+    <span style="color:var(--warning)">Acesso registrado</span>
+  </div>
+</div>
+{% endblock %}

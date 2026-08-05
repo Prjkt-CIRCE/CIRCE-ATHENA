@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-name">CIRCE // ATHENA</div>
+      <div class="sidebar__brand-sub">Inteligencia compartilhada</div>
+    </div>
+    <div class="sidebar__nav">
+      <a href="/"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Visao Geral</a>
+      <a href="/photos"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="8" cy="8" r="2.5"/></svg>Banco de Fotos</a>
+      <a href="/photos/compare"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="8" r="3"/><circle cx="11" cy="8" r="3"/><path d="M8 5v6" stroke-dasharray="2 1"/></svg>Comparar Foto</a>
+      <a href="/platea" class="active"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="6" r="2"/><circle cx="11" cy="6" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h6c2.2 0 4 1.8 4 4"/></svg>Platea</a>
+      <a href="/assistant"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h12v8H9l-3 2v-2H2z"/></svg>Assistente IA</a>
+      <a href="/reports"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8l2 2v10H2V2z"/><path d="M5 7h6M5 10h4"/></svg>Relatorios</a>
+      <a href="/audit"><svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h5"/></svg>Auditoria</a>
+    </div>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label">{{ operator.full_name if operator else "" }}</span>
+    </div>
+  </nav>
+
+  <!-- AREA PRINCIPAL -->
+  <div class="main-area">
+    <div class="page-header">
+      <span class="page-header__title">Platea</span>
+      <span class="page-header__subtitle">{{ total }} caso(s) compartilhado(s)</span>
+      <div class="page-header__spacer"></div>
+      <div class="page-header__user">
+        <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+        <div>
+          <div class="page-header__user-name">{{ operator.full_name }}</div>
+          <div class="page-header__user-role">{{ operator.role }}</div>
+        </div>
+        <div class="page-header__divider"></div>
+        <form method="post" action="/logout" style="margin:0">
+          <button type="submit" class="btn-logout">Sair</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- AVISO LEGAL -->
+      <div class="alert alert--info" style="margin-bottom:20px">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>
+        <span>Todos os acessos a casos nesta area sao registrados no log de auditoria. Os dados exibidos foram publicados voluntariamente pelos operadores de origem.</span>
+      </div>
+
+      {% if cases %}
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Referencia</th>
+              <th>Titulo</th>
+              <th>Classificacao</th>
+              <th>Status</th>
+              <th>Unidade de origem</th>
+              <th>Publicado por</th>
+              <th>Publicado em</th>
+              <th>Versao</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in cases %}
+            <tr style="cursor:pointer" onclick="window.location.href='/platea/{{ c.case_ref }}'">
+              <td class="mono-cell">{{ c.case_ref }}</td>
+              <td>
+                <div style="font-weight:500">{{ c.title }}</div>
+              </td>
+              <td>
+                {% if c.classification %}
+                  <span class="badge badge--info">{{ c.classification }}</span>
+                {% else %}
+                  <span class="text-tertiary text-xs">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.status == "aberto" %}
+                  <span class="badge badge--success">Aberto</span>
+                {% elif c.status == "arquivado" %}
+                  <span class="badge badge--muted">Arquivado</span>
+                {% else %}
+                  <span class="badge badge--warning">{{ c.status }}</span>
+                {% endif %}
+              </td>
+              <td class="text-secondary">{{ c.source_unit or "—" }}</td>
+              <td class="mono-cell">{{ c.published_by }}</td>
+              <td class="mono-cell">{{ c.published_at.strftime("%d/%m/%Y %H:%M") }}</td>
+              <td class="mono-cell" style="color:var(--text-tertiary)">v{{ c.published_version }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if total_pages > 1 %}
+        <div style="padding:12px 16px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;color:var(--text-tertiary)">Pagina {{ page }} de {{ total_pages }} &mdash; {{ total }} caso(s)</span>
+          <div style="display:flex;gap:8px">
+            {% if page > 1 %}
+            <a href="/platea?page={{ page - 1 }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Anterior</a>
+            {% endif %}
+            {% if page < total_pages %}
+            <a href="/platea?page={{ page + 1 }}" class="btn-secondary" style="padding:5px 12px;font-size:12px">Proxima</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      {% else %}
+      <div class="card" style="padding:48px;text-align:center">
+        <div style="color:var(--text-tertiary);font-size:13px">Nenhum caso compartilhado na Platea ainda.</div>
+        <div style="color:var(--text-tertiary);font-size:12px;margin-top:8px">
+          Casos sao publicados pelo Intel Desk quando o operador marca "Compartilhar na Platea".
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ operator.username if operator else "" }}</span>
+    <span class="status-bar__sep">|</span>
+    <span>Platea</span>
+    <span class="status-bar__sep">|</span>
+    <span>{{ total }} caso(s)</span>
+  </div>
+</div>
+{% endblock %}
