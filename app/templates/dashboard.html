@@ -1,480 +1,673 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+/* ATHENA_HOME_V3 */
+.home-main {
+    margin-left: 232px;
+    min-height: 100vh;
+    padding-bottom: var(--statusbar-height);
+}
 
-<div class="app-layout">
+.home-header {
+    height: 58px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    padding: 0 26px;
+    background: rgba(34,35,42,.94);
+}
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar__brand">
-            <div class="sidebar__brand-name">CIRCE // ATHENA</div>
-            <div class="sidebar__brand-sub">Sistema de Inteligencia</div>
-        </div>
+.home-header__title {
+    font-size: 19px;
+    font-weight: 620;
+    letter-spacing: -.015em;
+}
 
-        <nav class="sidebar__nav">
-            <a href="/" class="active">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="1" y="1" width="6" height="6" rx="1"/>
-                    <rect x="9" y="1" width="6" height="6" rx="1"/>
-                    <rect x="1" y="9" width="6" height="6" rx="1"/>
-                    <rect x="9" y="9" width="6" height="6" rx="1"/>
-                </svg>
-                Visao Geral
-            </a>
-            <a href="/assistant">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="8" cy="8" r="6"/>
-                    <path d="M5.5 9.5c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5"/>
-                    <circle cx="8" cy="5" r="0.75" fill="currentColor"/>
-                </svg>
-                Assistente IA
-            </a>
-            <a href="/reports">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="2" y="1" width="10" height="13" rx="1"/>
-                    <path d="M5 5h5M5 8h5M5 11h3"/>
-                    <path d="M10 1v3h3"/>
-                </svg>
-                Relatorios
-            </a>
-            <a href="/photos">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="1" y="3" width="14" height="10" rx="1"/>
-                    <circle cx="8" cy="8" r="2.5"/>
-                    <circle cx="12.5" cy="5" r="0.75" fill="currentColor"/>
-                </svg>
-                Banco de Fotos
-            </a>
-            <a href="/platea">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="4" cy="5" r="2"/>
-                    <circle cx="12" cy="5" r="2"/>
-                    <circle cx="8" cy="11" r="2"/>
-                    <path d="M4 7v1l4 2 4-2V7"/>
-                </svg>
-                Platea
-            </a>
-            <a href="/audit">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M2 4h12M2 8h8M2 12h5"/>
-                    <circle cx="13" cy="11" r="2.5"/>
-                    <path d="M14.8 12.8l1.2 1.2"/>
-                </svg>
-                Auditoria
-            </a>
-            <a href="/admin">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="8" cy="8" r="2"/>
-                    <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
-                </svg>
-                Administracao
-            </a>
-            <a href="/settings">
-                <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M6.5 2h3l.5 1.5a5 5 0 011.2.7l1.5-.4 1.5 2.6-1.1 1.1a5 5 0 010 1.4l1.1 1.1-1.5 2.6-1.5-.4a5 5 0 01-1.2.7L10 14H6.5l-.5-1.5a5 5 0 01-1.2-.7l-1.5.4-1.5-2.6 1.1-1.1a5 5 0 010-1.4L1.8 6.4l1.5-2.6 1.5.4A5 5 0 016 3.5L6.5 2z"/>
-                    <circle cx="8" cy="8" r="1.8"/>
-                </svg>
-                Configuracoes
-            </a>
-        </nav>
+.home-header__spacer { flex: 1; }
 
-        <div class="sidebar__footer">
-            <div class="sidebar__footer-dot"></div>
-            <div>
-                <svg style="width:10px;height:10px;margin-right:4px;vertical-align:middle;opacity:0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="7" width="10" height="7" rx="1"/>
-                    <path d="M5 7V5a3 3 0 016 0v2"/>
-                </svg>
-                <span class="sidebar__footer-label">Ambiente Local</span>
-            </div>
-        </div>
-    </aside>
+.home-header__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    <!-- ÁREA PRINCIPAL -->
-    <div class="main-area">
+.home-header__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+}
 
-        <!-- HEADER -->
-        <header class="page-header">
-            <div style="display:flex;align-items:baseline;gap:0;flex:1;">
-                <span class="page-header__title">Visao Geral</span>
-                <span class="page-header__subtitle">Nucleo de Inteligencia</span>
-            </div>
+.home-header__name {
+    font-size: 15px;
+    font-weight: 600;
+}
 
-            <div class="page-header__status">
-                <span class="page-header__status-dot"></span>
-                ATHENA OPERACIONAL
-            </div>
+.home-header__role {
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
 
-            <div style="width:1px;height:24px;background:var(--border-subtle);margin:0 8px;"></div>
+.home-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 28px 30px 44px;
+}
 
-            <div class="page-header__user">
-                <div class="page-header__avatar" id="user-avatar">{{ operator.full_name[:2] | upper }}</div>
-                <div class="page-header__user-info">
-                    <span class="page-header__user-name">{{ operator.full_name }}</span>
-                    <span class="page-header__user-role">{{ operator.role }}</span>
+.summary-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(34,35,42,.95), rgba(31,32,38,.95));
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    margin-bottom: 24px;
+}
+
+.summary-copy {
+    flex: 1;
+}
+
+.summary-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+}
+
+.summary-title {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+
+.summary-sub {
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.summary-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-card {
+    min-width: 128px;
+    padding: 13px 14px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 9px;
+    background: #1c1d22;
+}
+
+.stat-value {
+    font-size: 21px;
+    font-weight: 650;
+    line-height: 1;
+}
+
+.stat-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.core-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(320px, .8fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.panel-head {
+    min-height: 52px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-title {
+    font-size: 16px;
+    font-weight: 620;
+}
+
+.panel-meta {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.case-list {
+    padding: 6px 0;
+}
+
+.case-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 18px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background .12s ease;
+}
+
+.case-row:last-child {
+    border-bottom: 0;
+}
+
+.case-row:hover {
+    background: var(--bg-hover);
+}
+
+.case-title {
+    font-size: 15.5px;
+    font-weight: 620;
+    margin-bottom: 6px;
+}
+
+.case-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+}
+
+.case-ref {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: #969590;
+}
+
+.case-badge {
+    align-self: start;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    border: 1px solid var(--info);
+    color: var(--info);
+    border-radius: 4px;
+    padding: 3px 7px;
+}
+
+.athena-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.athena-body {
+    padding: 22px 20px 18px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.athena-orb {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    border: 1px solid rgba(95,179,207,.25);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.athena-orb svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.athena-heading {
+    font-size: 19px;
+    font-weight: 620;
+    margin-bottom: 8px;
+}
+
+.athena-copy {
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin-bottom: 20px;
+}
+
+.athena-prompt {
+    margin-top: auto;
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    min-height: 46px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    color: #aaa9a4;
+    font-size: 14px;
+    transition: border-color .12s ease, background .12s ease;
+}
+
+.athena-prompt:hover {
+    border-color: #4a4e59;
+    background: #25262d;
+}
+
+.athena-prompt svg {
+    margin-left: auto;
+    width: 17px;
+    height: 17px;
+    color: var(--text-tertiary);
+}
+
+
+.modules-section {
+    margin-top: 22px;
+}
+
+.modules-head,
+.activity-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 11px;
+}
+
+.modules-title,
+.activity-title {
+    font-size: 16px;
+    font-weight: 620;
+}
+
+.modules-meta,
+.activity-meta {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.module-card {
+    min-height: 132px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    padding: 15px 16px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .12s ease, background .12s ease;
+}
+
+.module-card--active:hover {
+    background: var(--bg-hover);
+    border-color: #3d414c;
+}
+
+.module-card--planned {
+    opacity: .62;
+    cursor: default;
+}
+
+.module-card__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.module-card__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.module-card__icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.module-card__badge {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border-strong);
+    color: var(--text-tertiary);
+    border-radius: 4px;
+    padding: 3px 6px;
+}
+
+.module-card__title {
+    margin-top: 15px;
+    font-size: 14px;
+    font-weight: 620;
+}
+
+.module-card__desc {
+    margin-top: 6px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+.activity-section {
+    margin-top: 24px;
+}
+
+.activity-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.activity-item {
+    border-top: 1px solid var(--border-subtle);
+    padding: 11px 2px 0;
+}
+
+.activity-time {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+}
+
+.activity-action {
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.activity-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.empty-panel {
+    padding: 28px 18px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 14px;
+}
+
+@media (max-width: 1100px) {
+    .summary-panel {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .summary-stats {
+        width: 100%;
+    }
+    .stat-card {
+        flex: 1;
+    }
+    .core-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 920px) {
+    .modules-grid,
+    .activity-strip {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .home-content {
+        padding: 22px 16px 38px;
+    }
+    .summary-stats,
+    .modules-grid,
+    .activity-strip {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+}
+</style>
+
+<div>
+    {% include "partials/sidebar.html" %}
+
+    <div class="home-main">
+        <header class="home-header">
+            <div class="home-header__title">Início</div>
+            <div class="home-header__spacer"></div>
+            <div class="home-header__user">
+                <div class="home-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
+                <div>
+                    <div class="home-header__name">{{ operator.full_name }}</div>
+                    <div class="home-header__role">{{ operator.role }}</div>
                 </div>
-                <form method="post" action="/logout" style="margin:0;">
-                    <button class="btn-logout" type="submit">Sair</button>
-                </form>
             </div>
         </header>
 
-        <!-- CONTEÚDO -->
-        <main class="page-content">
-            <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+        <main class="home-content">
+            <section class="summary-panel">
+                <div class="summary-copy">
+                    <div class="summary-eyebrow">ATHENA // VISÃO OPERACIONAL</div>
+                    <div class="summary-title">Situação atual do núcleo</div>
+                    <div class="summary-sub">Casos abertos, atividade recente e acesso direto à Athena.</div>
+                </div>
 
-                <!-- COLUNA PRINCIPAL -->
-                <div>
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ active_cases|length }}</div>
+                        <div class="stat-label">casos ativos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ recent_logs|length }}</div>
+                        <div class="stat-label">eventos recentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color:var(--success)">ON</div>
+                        <div class="stat-label">Athena local</div>
+                    </div>
+                </div>
+            </section>
 
-                    <!-- ASSISTENTE IA -->
-                    <div class="card mb-6" style="border-color:var(--border-strong);">
-                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                            <svg style="width:18px;height:18px;color:var(--accent)" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M2 4c0-1.1.9-2 2-2h8a2 2 0 012 2v6a2 2 0 01-2 2H9l-3 2v-2H4a2 2 0 01-2-2V4z"/>
-                                <path d="M5 7h6M5 9.5h3"/>
-                            </svg>
-                            <span style="font-size:16px;font-weight:600;">Como posso auxiliar sua analise?</span>
-                        </div>
-
-                        <textarea id="assistant-input"
-                            style="width:100%;background:var(--bg-base);border:1px solid var(--border-strong);
-                                   color:var(--text-primary);font-family:var(--font-sans);font-size:14px;
-                                   padding:12px;border-radius:3px;resize:none;height:90px;outline:none;
-                                   transition:border-color 0.12s;"
-                            placeholder="Pergunte sobre casos, pessoas, vinculos ou documentos..."
-                            onfocus="this.style.borderColor='var(--accent)'"
-                            onblur="this.style.borderColor='var(--border-strong)'"
-                        ></textarea>
-
-                        <div style="display:flex;align-items:center;gap:12px;margin-top:12px;">
-                            <select id="scope-select" style="background:var(--bg-elevated);border:1px solid var(--border-strong);
-                                color:var(--text-secondary);font-family:var(--font-mono);font-size:11px;
-                                padding:7px 12px;border-radius:3px;outline:none;cursor:pointer;flex:1;">
-                                <option value="all">Toda a base</option>
-                                <option value="platea">Apenas Platea</option>
-                            </select>
-                            <button id="ask-btn" class="btn-primary" onclick="askAthena()">
-                                Consultar Athena
-                            </button>
-                        </div>
-
-                        <!-- RESPOSTA -->
-                        <div id="assistant-response" style="display:none;margin-top:16px;">
-                            <div style="border-top:1px solid var(--border-subtle);padding-top:16px;">
-                                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                                    <span style="font-family:var(--font-mono);font-size:10px;
-                                                 letter-spacing:0.1em;color:var(--accent);text-transform:uppercase;">
-                                        Athena
-                                    </span>
-                                    <span id="response-time" style="font-family:var(--font-mono);font-size:10px;
-                                                                      color:var(--text-tertiary);"></span>
-                                </div>
-                                <div id="response-text" style="font-size:14px;line-height:1.7;
-                                                                color:var(--text-primary);white-space:pre-wrap;"></div>
-                                <div style="margin-top:12px;padding:8px 12px;background:var(--warning-soft);
-                                            border:1px solid var(--warning);border-radius:3px;
-                                            display:flex;align-items:center;gap:8px;">
-                                    <svg style="width:13px;height:13px;color:var(--warning);flex-shrink:0"
-                                         viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M8 1L1 14h14L8 1z"/>
-                                        <path d="M8 6v4M8 11.5v.5"/>
-                                    </svg>
-                                    <span style="font-family:var(--font-mono);font-size:10px;
-                                                 color:var(--warning);letter-spacing:0.06em;">
-                                        Resposta gerada por IA — sem acesso a base de dados local nesta fase.
-                                        Validacao humana obrigatoria antes de qualquer uso operacional.
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- LOADING -->
-                        <div id="assistant-loading" style="display:none;margin-top:16px;padding:16px;
-                             text-align:center;font-family:var(--font-mono);font-size:11px;
-                             color:var(--text-tertiary);letter-spacing:0.1em;">
-                            <span id="loading-text">PROCESSANDO...</span>
-                        </div>
+            <section class="core-grid">
+                <div class="panel">
+                    <div class="panel-head">
+                        <div class="panel-title">Em andamento</div>
+                        <a class="panel-meta" href="/platea" style="color:var(--accent)">Ver Platea →</a>
                     </div>
 
-                    <!-- AÇÕES RÁPIDAS -->
-                    <div class="section-label">Acoes rapidas</div>
-                    <div class="grid-4 mb-6">
-                        {% set quick_actions = [
-                            ("/reports/new", "Novo relatorio", "Inicie um novo relatorio de inteligencia.", "M2 1h10a1 1 0 011 1v13a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1zM5 5h6M5 8h6M5 11h3M10 1v3h3"),
-                            ("/photos/compare", "Comparar imagem", "Compare rostos e encontre semelhancas.", "M5 5m-3 0a3 3 0 106 0 3 3 0 00-6 0M11 5m-3 0a3 3 0 106 0 3 3 0 00-6 0M8 8v6M5 14h6"),
-                            ("/photos/new", "Cadastrar pessoa", "Adicione uma pessoa a base de dados.", "M8 7m-3 0a3 3 0 106 0 3 3 0 00-6 0M2 14c0-3 2.7-5 6-5s6 2 6 5M12 2v4M10 4h4"),
-                            ("/platea", "Consultar Platea", "Pesquise e analise vinculos.", "M4 5m-2 0a2 2 0 104 0 2 2 0 00-4 0M12 5m-2 0a2 2 0 104 0 2 2 0 00-4 0M8 11m-2 0a2 2 0 104 0 2 2 0 00-4 0M4 7v1l4 2 4-2V7")
-                        ] %}
-                        {% for href, title, desc, path in quick_actions %}
-                        <a href="{{ href }}">
-                            <div class="card" style="height:120px;cursor:pointer;display:flex;flex-direction:column;
-                                                     justify-content:space-between;transition:border-color 0.12s,background 0.12s;"
-                                 onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--bg-hover)'"
-                                 onmouseout="this.style.borderColor='var(--border-subtle)';this.style.background='var(--bg-elevated)'">
-                                <div style="display:flex;align-items:center;justify-content:space-between;">
-                                    <svg style="width:18px;height:18px;color:var(--accent)" viewBox="0 0 16 16"
-                                         fill="none" stroke="currentColor" stroke-width="1.5"
-                                         stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="{{ path }}"/>
-                                    </svg>
-                                    <span style="color:var(--accent);font-size:16px;font-weight:300;">→</span>
-                                </div>
-                                <div>
-                                    <div style="font-weight:500;font-size:13px;margin-bottom:3px;">{{ title }}</div>
-                                    <div style="font-size:12px;color:var(--text-secondary);line-height:1.4;">{{ desc }}</div>
+                    {% if active_cases %}
+                    <div class="case-list">
+                        {% for case in active_cases %}
+                        <a class="case-row" href="/platea/{{ case.case_ref }}">
+                            <div>
+                                <div class="case-title">{{ case.title }}</div>
+                                <div class="case-meta">
+                                    <span class="case-ref">{{ case.case_ref }}</span>
+                                    {% if case.source_unit %}<span>{{ case.source_unit }}</span>{% endif %}
+                                    {% if case.last_updated_at %}
+                                        <span>Atualizado {{ case.last_updated_at.strftime("%d/%m/%Y %H:%M") }}</span>
+                                    {% else %}
+                                        <span>Publicado {{ case.published_at.strftime("%d/%m/%Y %H:%M") }}</span>
+                                    {% endif %}
                                 </div>
                             </div>
+                            {% if case.classification %}
+                            <div class="case-badge">{{ case.classification }}</div>
+                            {% endif %}
                         </a>
                         {% endfor %}
                     </div>
-
-                    <!-- ATIVIDADE RECENTE -->
-                    <div class="card">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                            <div class="section-label" style="margin-bottom:0;">Atividade recente</div>
-                            <a href="/audit" style="font-family:var(--font-mono);font-size:10px;
-                                                     color:var(--accent);text-decoration:none;letter-spacing:0.08em;">
-                                Ver todas →
-                            </a>
-                        </div>
-                        <div id="recent-activity">
-                            <div style="text-align:center;padding:24px;font-family:var(--font-mono);
-                                        font-size:11px;color:var(--text-tertiary);">
-                                Carregando atividades...
-                            </div>
-                        </div>
-                    </div>
-
+                    {% else %}
+                    <div class="empty-panel">Nenhum caso aberto disponível.</div>
+                    {% endif %}
                 </div>
 
-                <!-- COLUNA DIREITA -->
-                <div>
-
-                    <!-- REQUER ATENÇÃO -->
-                    <div class="card mb-6" style="border-color:var(--border-strong);">
-                        <div class="section-label">Requer atencao</div>
-                        <div style="display:flex;flex-direction:column;gap:2px;" id="attention-list">
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;
-                                        border-bottom:1px solid var(--border-subtle);">
-                                <svg style="width:16px;height:16px;color:var(--warning);flex-shrink:0"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <circle cx="5" cy="5" r="3"/><circle cx="11" cy="5" r="3"/>
-                                    <path d="M5 8v1l3 1.5L14 8V7"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">Comparacoes faciais</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">Aguardando revisao</div>
-                                </div>
-                                <span style="font-family:var(--font-mono);font-size:18px;font-weight:600;
-                                             color:var(--warning);">0</span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;
-                                        border-bottom:1px solid var(--border-subtle);">
-                                <svg style="width:16px;height:16px;color:var(--info);flex-shrink:0"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <rect x="2" y="1" width="10" height="13" rx="1"/>
-                                    <path d="M5 5h5M5 8h5M5 11h3M10 1v3h3"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">Relatorios rascunho</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">Aguardando revisao</div>
-                                </div>
-                                <span style="font-family:var(--font-mono);font-size:18px;font-weight:600;
-                                             color:var(--info);">0</span>
-                            </div>
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;">
-                                <svg style="width:16px;height:16px;color:var(--error);flex-shrink:0"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M8 1L1 14h14L8 1z"/>
-                                    <path d="M8 6v4M8 11.5v.5"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">Falhas de indexacao</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">Requer intervencao</div>
-                                </div>
-                                <span style="font-family:var(--font-mono);font-size:18px;font-weight:600;
-                                             color:var(--error);">0</span>
-                            </div>
-                        </div>
+                <aside class="panel athena-panel">
+                    <div class="panel-head">
+                        <div class="panel-title">Athena</div>
+                        <div class="panel-meta">modelo local</div>
                     </div>
-
-                    <!-- SERVICOS LOCAIS -->
-                    <div class="card">
-                        <div class="section-label">Servicos locais</div>
-                        <div style="display:flex;flex-direction:column;gap:2px;">
-
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;
-                                        border-bottom:1px solid var(--border-subtle);">
-                                <svg style="width:16px;height:16px;color:var(--text-tertiary)"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <circle cx="8" cy="8" r="6"/>
-                                    <path d="M5.5 9.5c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5"/>
-                                    <circle cx="8" cy="5" r="0.75" fill="currentColor"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">IA local</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">Modelos e inferencias</div>
-                                </div>
-                                <span id="llm-status" style="font-family:var(--font-mono);font-size:10px;
-                                      letter-spacing:0.08em;color:var(--text-tertiary);">
-                                    verificando...
-                                </span>
-                            </div>
-
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;
-                                        border-bottom:1px solid var(--border-subtle);">
-                                <svg style="width:16px;height:16px;color:var(--text-tertiary)"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <ellipse cx="8" cy="5" rx="6" ry="2"/>
-                                    <path d="M2 5v4c0 1.1 2.7 2 6 2s6-.9 6-2V5"/>
-                                    <path d="M2 9v2c0 1.1 2.7 2 6 2s6-.9 6-2V9"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">Base de dados</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">athena.db — SQLite</div>
-                                </div>
-                                <span style="font-family:var(--font-mono);font-size:10px;
-                                             letter-spacing:0.08em;color:var(--success);">
-                                    <span class="status-dot status-dot--ok"></span>Online
-                                </span>
-                            </div>
-
-                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;">
-                                <svg style="width:16px;height:16px;color:var(--text-tertiary)"
-                                     viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <rect x="3" y="7" width="10" height="7" rx="1"/>
-                                    <path d="M5 7V5a3 3 0 016 0v2"/>
-                                </svg>
-                                <div style="flex:1;">
-                                    <div style="font-size:13px;color:var(--text-primary);">Rede</div>
-                                    <div style="font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);">Privada do nucleo</div>
-                                </div>
-                                <span style="font-family:var(--font-mono);font-size:10px;
-                                             letter-spacing:0.08em;color:var(--success);">
-                                    <span class="status-dot status-dot--ok"></span>Local
-                                </span>
-                            </div>
+                    <div class="athena-body">
+                        <div class="athena-orb">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M8 9h8"/>
+                                <path d="M8 13h5"/>
+                                <path d="M5 19l-1.5 2v-5A8 8 0 1 1 5 19Z"/>
+                            </svg>
                         </div>
-
-                        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle);
-                                    display:flex;align-items:center;gap:8px;">
-                            <span class="status-dot status-dot--ok"></span>
-                            <span style="font-family:var(--font-mono);font-size:10px;
-                                         color:var(--success);letter-spacing:0.08em;" id="services-summary">
-                                Verificando servicos...
-                            </span>
+                        <div class="athena-heading">Precisa analisar algo?</div>
+                        <div class="athena-copy">
+                            Abra a conversa completa para consultar o modelo local. O acesso contextual à Platea ainda entra em uma etapa posterior.
                         </div>
+                        <a class="athena-prompt" href="/assistant">
+                            Pergunte à Athena…
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </a>
                     </div>
+                </aside>
+            </section>
 
+            <section class="modules-section">
+                <div class="modules-head">
+                    <div class="modules-title">Módulos</div>
+                    <div class="modules-meta">ecossistema Athena</div>
                 </div>
-            </div>
+
+                <div class="modules-grid">
+                    <a class="module-card module-card--active" href="/photos">
+                        <div class="module-card__top">
+                            <div class="module-card__icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                    <circle cx="9" cy="10" r="2"/>
+                                    <path d="m21 15-4.5-4.5L8 19"/>
+                                </svg>
+                            </div>
+                            <div class="module-card__badge">ativo</div>
+                        </div>
+                        <div class="module-card__title">Reconhecimento Facial</div>
+                        <div class="module-card__desc">Banco de fotos e comparação facial com validação humana.</div>
+                    </a>
+
+                    <div class="module-card module-card--planned">
+                        <div class="module-card__top">
+                            <div class="module-card__icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                                    <path d="M8 4v16M16 4v16"/>
+                                    <path d="M3 9h5M16 9h5M3 15h5M16 15h5"/>
+                                </svg>
+                            </div>
+                            <div class="module-card__badge">planejado</div>
+                        </div>
+                        <div class="module-card__title">Extrator de Frames</div>
+                        <div class="module-card__desc">Extração de quadros para janelas de oportunidade e análise visual.</div>
+                    </div>
+
+                    <div class="module-card module-card--planned">
+                        <div class="module-card__top">
+                            <div class="module-card__icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="11" cy="11" r="7"/>
+                                    <path d="m20 20-4-4"/>
+                                    <path d="M8 11h6M11 8v6"/>
+                                </svg>
+                            </div>
+                            <div class="module-card__badge">planejado</div>
+                        </div>
+                        <div class="module-card__title">ANUBIS</div>
+                        <div class="module-card__desc">OSINT e coleta orientada de fontes abertas para apoio analítico.</div>
+                    </div>
+
+                    <div class="module-card module-card--planned">
+                        <div class="module-card__top">
+                            <div class="module-card__icon">
+                                <svg viewBox="0 0 24 24">
+                                    <circle cx="6" cy="6" r="2"/>
+                                    <circle cx="18" cy="6" r="2"/>
+                                    <circle cx="12" cy="18" r="2"/>
+                                    <path d="M7.7 7.1 10.7 16M16.3 7.1 13.3 16M8 6h8"/>
+                                </svg>
+                            </div>
+                            <div class="module-card__badge">planejado</div>
+                        </div>
+                        <div class="module-card__title">Nexus</div>
+                        <div class="module-card__desc">Mapeamento visual de vínculos, relações e tipologias investigativas.</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="activity-section">
+                <div class="activity-head">
+                    <div class="activity-title">Atividade recente</div>
+                    <div class="activity-meta">auditoria local</div>
+                </div>
+
+                {% if recent_logs %}
+                <div class="activity-strip">
+                    {% for log in recent_logs[:4] %}
+                    <div class="activity-item">
+                        <div class="activity-time">{{ log.timestamp.strftime("%d/%m %H:%M") }}</div>
+                        <div class="activity-action">{{ log.action.replace("_", " ") | title }}</div>
+                        <div class="activity-desc">{{ log.description }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-panel">Nenhuma atividade recente.</div>
+                {% endif %}
+            </section>
         </main>
     </div>
+
+    <div class="status-bar">
+        <span><span class="status-dot status-dot--ok"></span>Athena online</span>
+        <span class="status-bar__sep">|</span>
+        <span>Ambiente local</span>
+        <span class="status-bar__sep">|</span>
+        <span>Home</span>
+    </div>
 </div>
-
-<!-- STATUS BAR -->
-<div class="status-bar">
-    <span><span class="status-dot status-dot--ok"></span>ATHENA ONLINE</span>
-    <span style="color:var(--border-strong)">|</span>
-    <span>FASE 0 — PILOTO</span>
-    <span style="color:var(--border-strong)">|</span>
-    <span>REDE PRIVADA</span>
-    <span style="margin-left:auto;color:var(--text-disabled);">v0.1.0-AT01</span>
-</div>
-
-<script>
-// ── ASSISTENTE IA ──
-async function askAthena() {
-    const input = document.getElementById('assistant-input');
-    const btn   = document.getElementById('ask-btn');
-    const resp  = document.getElementById('assistant-response');
-    const load  = document.getElementById('assistant-loading');
-    const text  = document.getElementById('response-text');
-    const rtime = document.getElementById('response-time');
-    const ltxt  = document.getElementById('loading-text');
-
-    const question = input.value.trim();
-    if (!question) { input.focus(); return; }
-
-    btn.disabled = true;
-    resp.style.display = 'none';
-    load.style.display = 'block';
-
-    const msgs = [
-        'CONSULTANDO MODELO LOCAL...',
-        'PROCESSANDO CONTEXTO...',
-        'GERANDO RESPOSTA...'
-    ];
-    let mi = 0;
-    const ticker = setInterval(() => { ltxt.textContent = msgs[mi++ % msgs.length]; }, 1200);
-
-    const t0 = Date.now();
-    try {
-        const r = await fetch('/api/assistant/query', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ question, scope: document.getElementById('scope-select').value })
-        });
-        const data = await r.json();
-        clearInterval(ticker);
-        load.style.display = 'none';
-        text.textContent = data.answer || 'Sem resposta.';
-        rtime.textContent = `${((Date.now()-t0)/1000).toFixed(1)}s`;
-        resp.style.display = 'block';
-    } catch(e) {
-        clearInterval(ticker);
-        load.style.display = 'none';
-        text.textContent = 'Erro ao contactar o modelo local. Verifique se o LM Studio esta ativo.';
-        resp.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-    }
-}
-
-document.getElementById('assistant-input').addEventListener('keydown', e => {
-    if (e.ctrlKey && e.key === 'Enter') askAthena();
-});
-
-// ── STATUS LLM ──
-async function checkLLM() {
-    const el = document.getElementById('llm-status');
-    const sv = document.getElementById('services-summary');
-    try {
-        const r = await fetch('/api/system/llm-status');
-        const d = await r.json();
-        if (d.ok) {
-            el.innerHTML = '<span class="status-dot status-dot--ok"></span><span style="color:var(--success)">Operacional</span>';
-            sv.textContent = '3/3 servicos ativos';
-        } else {
-            el.innerHTML = '<span class="status-dot status-dot--warn"></span><span style="color:var(--warning)">Inativo</span>';
-            sv.textContent = '2/3 servicos ativos';
-        }
-    } catch {
-        el.innerHTML = '<span class="status-dot status-dot--error"></span><span style="color:var(--error)">Erro</span>';
-    }
-}
-
-// ── ATIVIDADE RECENTE ──
-async function loadActivity() {
-    const el = document.getElementById('recent-activity');
-    try {
-        const r = await fetch('/api/system/recent-activity');
-        const d = await r.json();
-        if (!d.items || d.items.length === 0) {
-            el.innerHTML = '<div style="text-align:center;padding:24px;font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);">Nenhuma atividade registrada.</div>';
-            return;
-        }
-        el.innerHTML = d.items.map(item => `
-            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border-subtle);">
-                <div style="flex:1;font-size:13px;color:var(--text-primary);">${item.description}</div>
-                <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);white-space:nowrap;">${item.time}</span>
-            </div>
-        `).join('');
-    } catch {
-        el.innerHTML = '<div style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);padding:12px 0;">Erro ao carregar atividades.</div>';
-    }
-}
-
-checkLLM();
-loadActivity();
-</script>
 {% endblock %}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -43,12 +43,12 @@
             --info-soft:      rgba(122, 175, 201, 0.10);
 
             /* Tipografia */
-            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-sans: 'Geist', 'Segoe UI Variable Text', 'Segoe UI Variable', 'Segoe UI', Inter, system-ui, sans-serif;
             --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
             /* Layout */
-            --sidebar-width:    200px;
-            --header-height:    52px;
+            --sidebar-width:    232px;
+            --header-height:    58px;
             --statusbar-height: 28px;
         }
 
@@ -62,8 +62,8 @@
             background: var(--bg-base);
             color: var(--text-primary);
             font-family: var(--font-sans);
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.55;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
@@ -94,11 +94,11 @@
         }
 
         .sidebar__brand-name {
-            font-family: var(--font-mono);
-            font-size: 12px;
+            font-family: var(--font-sans);
+            font-size: 19px;
             font-weight: 500;
-            letter-spacing: 0.16em;
-            color: var(--accent);
+            letter-spacing: 0.12em;
+            color: var(--text-primary);
             text-transform: uppercase;
         }
 
@@ -121,10 +121,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 9px 16px;
+            padding: 11px 16px;
             font-family: var(--font-sans);
-            font-size: 13px;
-            font-weight: 400;
+            font-size: 15px;
+            font-weight: 500;
             color: var(--text-secondary);
             text-decoration: none;
             border-left: 2px solid transparent;
@@ -144,8 +144,8 @@
         }
 
         .sidebar__nav .nav-icon {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
             opacity: 0.6;
         }
@@ -163,7 +163,7 @@
 
         .sidebar__footer-label {
             font-family: var(--font-mono);
-            font-size: 9px;
+            font-size: 10px;
             letter-spacing: 0.1em;
             color: var(--text-tertiary);
             text-transform: uppercase;
@@ -194,7 +194,7 @@
 
         .page-header__title {
             font-family: var(--font-sans);
-            font-size: 17px;
+            font-size: 19px;
             font-weight: 600;
             color: var(--text-primary);
         }
@@ -259,15 +259,15 @@
 
         .page-header__user-name {
             font-family: var(--font-sans);
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             color: var(--text-primary);
             line-height: 1.2;
         }
 
         .page-header__user-role {
             font-family: var(--font-mono);
-            font-size: 9px;
+            font-size: 10px;
             letter-spacing: 0.1em;
             color: var(--text-tertiary);
             text-transform: uppercase;
@@ -330,7 +330,7 @@
         /* ── LABELS DE SEÇÃO ── */
         .section-label {
             font-family: var(--font-sans);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -344,7 +344,7 @@
         .form-label {
             display: block;
             font-family: var(--font-sans);
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
             margin-bottom: 6px;
@@ -358,8 +358,8 @@
             border: 1px solid var(--border-strong);
             color: var(--text-primary);
             font-family: var(--font-sans);
-            font-size: 14px;
-            padding: 9px 12px;
+            font-size: 15px;
+            padding: 10px 12px;
             border-radius: 3px;
             outline: none;
             transition: border-color 0.12s, box-shadow 0.12s;
@@ -380,10 +380,10 @@
             color: #0d1317;
             border: none;
             font-family: var(--font-sans);
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            letter-spacing: 0.02em;
-            padding: 9px 20px;
+            letter-spacing: 0.01em;
+            padding: 10px 20px;
             border-radius: 3px;
             cursor: pointer;
             transition: opacity 0.12s;
@@ -398,9 +398,9 @@
             color: var(--text-secondary);
             border: 1px solid var(--border-strong);
             font-family: var(--font-sans);
-            font-size: 13px;
-            font-weight: 400;
-            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 9px 16px;
             border-radius: 3px;
             cursor: pointer;
             transition: color 0.12s, border-color 0.12s;
@@ -416,7 +416,7 @@
             border: none;
             color: var(--accent);
             font-family: var(--font-sans);
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
             padding: 0;
             transition: opacity 0.12s;
@@ -486,7 +486,7 @@
         .data-table th {
             text-align: left;
             font-family: var(--font-sans);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.04em;
             text-transform: uppercase;
@@ -496,9 +496,9 @@
         }
 
         .data-table td {
-            padding: 10px 12px;
+            padding: 11px 12px;
             border-bottom: 1px solid var(--border-subtle);
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-primary);
         }
 
@@ -525,8 +525,8 @@
         .text-success   { color: var(--success); }
         .text-warning   { color: var(--warning); }
         .text-error     { color: var(--error); }
-        .text-sm        { font-size: 13px; }
-        .text-xs        { font-size: 11px; }
+        .text-sm        { font-size: 14px; }
+        .text-xs        { font-size: 12px; }
         .text-xxs       { font-size: 10px; font-family: var(--font-mono); }
         .flex           { display: flex; }
         .flex-col       { flex-direction: column; }
@@ -542,9 +542,128 @@
         .mb-4   { margin-bottom: 16px; }
         .mb-6   { margin-bottom: 24px; }
         .w-full { width: 100%; }
-    </style>
+    /* ATHENA_SHARED_SIDEBAR_V1 */
+.athena-global-sidebar {
+    width: 232px !important;
+    padding: 18px 12px 14px;
+    bottom: var(--statusbar-height) !important;
+}
+
+.athena-global-sidebar .sidebar__brand {
+    padding: 5px 10px 24px !important;
+    border-bottom: 0 !important;
+}
+
+.athena-global-sidebar .sidebar__brand-name {
+    font-family: var(--font-sans) !important;
+    font-size: 19px !important;
+    font-weight: 650 !important;
+    letter-spacing: .12em !important;
+    color: var(--text-primary) !important;
+    text-transform: uppercase;
+}
+
+.athena-global-sidebar .sidebar__brand-sub {
+    margin-top: 5px !important;
+    font-family: var(--font-mono) !important;
+    font-size: 9px !important;
+    letter-spacing: .11em !important;
+    color: var(--text-tertiary) !important;
+}
+
+.athena-global-nav {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.athena-global-nav .sidebar__section-label {
+    padding: 0 12px;
+    margin: 8px 0 4px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    line-height: 20px;
+    letter-spacing: .12em;
+    color: #666762;
+    text-transform: uppercase;
+}
+
+.athena-global-nav .sidebar__section-label--secondary {
+    margin-top: 18px;
+}
+
+.athena-global-nav a {
+    min-height: 44px;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 7px;
+    gap: 12px !important;
+    font-family: var(--font-sans) !important;
+    font-size: 15px !important;
+    line-height: 1.2;
+    font-weight: 500 !important;
+    color: #c0bfba !important;
+    transition: background .12s ease, color .12s ease;
+}
+
+.athena-global-nav a:hover {
+    background: var(--bg-hover) !important;
+    color: var(--text-primary) !important;
+}
+
+.athena-global-nav a.active {
+    background: rgba(95,179,207,.12) !important;
+    color: var(--accent-strong) !important;
+    border: 0 !important;
+}
+
+.athena-global-nav .nav-icon {
+    width: 18px !important;
+    height: 18px !important;
+    flex: 0 0 18px;
+    opacity: .9 !important;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.athena-sidebar-user {
+    margin-top: auto;
+    min-height: 62px;
+    padding: 14px 10px 4px !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    display: block !important;
+}
+
+.athena-sidebar-user__name {
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.athena-sidebar-user__role {
+    margin-top: 4px;
+    color: #9a9994;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.main-area {
+    margin-left: 232px !important;
+}
+
+</style>
 </head>
 <body>
 {% block content %}{% endblock %}
 </body>
 </html>
+
+
+

@@ -6,6 +6,7 @@ import httpx
 from app.config import settings
 from app.database import SessionLocal
 from app.models.operator import AuditLog
+from app.models.platea import SharedCase
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -19,7 +20,40 @@ async def health():
 @router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
     operator = request.session.get("operator", {})
-    return templates.TemplateResponse("dashboard.html", {
+    db = SessionLocal()
+    try:
+        active_cases = (
+            db.query(SharedCase)
+            .filter(SharedCase.status == "aberto")
+            .order_by(
+                SharedCase.last_updated_at.desc(),
+                SharedCase.published_at.desc(),
+            )
+            .limit(6)
+            .all()
+        )
+
+        recent_logs = (
+            db.query(AuditLog)
+            .order_by(AuditLog.id.desc())
+            .limit(8)
+            .all()
+        )
+
+        return templates.TemplateResponse("dashboard.html", {
+            "request": request,
+            "operator": operator,
+            "active_cases": active_cases,
+            "recent_logs": recent_logs,
+        })
+    finally:
+        db.close()
+
+
+@router.get("/assistant", response_class=HTMLResponse)
+async def assistant_page(request: Request):
+    operator = request.session.get("operator", {})
+    return templates.TemplateResponse("assistant.html", {
         "request": request,
         "operator": operator,
     })
@@ -94,7 +128,6 @@ async def recent_activity():
         now = datetime.now(timezone.utc)
         for log in logs:
             ts = log.timestamp
-            # Normaliza para aware se vier naive do SQLite
             if ts.tzinfo is None:
                 ts = ts.replace(tzinfo=timezone.utc)
             diff = (now - ts).total_seconds()
