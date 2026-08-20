@@ -1,4 +1,4 @@
-{# Sidebar compartilhada ATHENA v1 #}
+{# Sidebar compartilhada ATHENA — alinhada à ADR-002 #}
 {% set current_path = request.url.path %}
 
 <aside class="sidebar athena-global-sidebar">
@@ -21,11 +21,10 @@
 
         <a href="/platea" class="{% if current_path.startswith('/platea') %}active{% endif %}">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 3 4 7l8 4 8-4-8-4Z"/>
-                <path d="m4 12 8 4 8-4"/>
-                <path d="m4 17 8 4 8-4"/>
+                <path d="M4 5h16v14H4z"/>
+                <path d="M8 9h8M8 13h5"/>
             </svg>
-            <span>Platea</span>
+            <span>Gestor de Investigações</span>
         </a>
 
         <a href="/photos" class="{% if current_path == '/photos' or current_path.startswith('/photos/') %}active{% endif %}">
@@ -43,19 +42,10 @@
                 <path d="M8 13h5"/>
                 <path d="M5 19l-1.5 2v-5A8 8 0 1 1 5 19Z"/>
             </svg>
-            <span>Athena</span>
+            <span>Assistente de Inteligência</span>
         </a>
 
-        <div class="sidebar__section-label sidebar__section-label--secondary">Operacional</div>
-
-        <a href="/reports" class="{% if current_path.startswith('/reports') %}active{% endif %}">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M6 3h9l3 3v15H6z"/>
-                <path d="M14 3v4h4"/>
-                <path d="M9 11h6M9 15h6"/>
-            </svg>
-            <span>Relatórios</span>
-        </a>
+        <div class="sidebar__section-label sidebar__section-label--secondary">Sistema</div>
 
         <a href="/audit" class="{% if current_path.startswith('/audit') %}active{% endif %}">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
