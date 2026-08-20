@@ -57,6 +57,19 @@ class AuditLog(Base):
         return hashlib.sha256(payload.encode()).hexdigest()
 
 
+class AssistantExecutionPreference(Base):
+    """Preferência persistente de modo de execução por operador."""
+    __tablename__ = "assistant_execution_preferences"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    operator_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)
+    mode: Mapped[str] = mapped_column(String(16), default="safe", nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
 class SyncQueue(Base):
     __tablename__ = "sync_queue"
 

@@ -30,6 +30,7 @@ class SharedCase(Base):
     documents: Mapped[List["SharedDocument"]]  = relationship(back_populates="case", cascade="all, delete-orphan")
     links:     Mapped[List["SharedLink"]]      = relationship(back_populates="case", cascade="all, delete-orphan")
     accesses:  Mapped[List["PlateaAccessLog"]] = relationship(back_populates="case", cascade="all, delete-orphan")
+    annotations: Mapped[List["SharedCaseAnnotation"]] = relationship(back_populates="case", cascade="all, delete-orphan")
 
 
 class SharedPerson(Base):
@@ -80,6 +81,29 @@ class SharedLink(Base):
 
     case: Mapped["SharedCase"] = relationship(back_populates="links")
 
+
+class SharedCaseAnnotation(Base):
+    """
+    Anotação humana vinculada a um caso compartilhado.
+
+    Não substitui SharedCase.notes, que pertence ao payload sincronizado.
+    Registros desta tabela são criados por ação humana explícita e auditada.
+    """
+    __tablename__ = "shared_case_annotations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    shared_case_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("shared_cases.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_by_operator_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_by_username: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    case: Mapped["SharedCase"] = relationship(back_populates="annotations")
 
 class PlateaAccessLog(Base):
     __tablename__ = "platea_access_log"

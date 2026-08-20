@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 from app.database import engine, Base
-from app.models.operator import Operator, AuditLog, SyncQueue
+from app.models.operator import Operator, AuditLog, SyncQueue, AssistantExecutionPreference
 from app.models.photo import Photo
-from app.models.platea import SharedCase, SharedPerson, SharedDocument, SharedLink, PlateaAccessLog
+from app.models.platea import SharedCase, SharedPerson, SharedDocument, SharedLink, SharedCaseAnnotation, PlateaAccessLog
 from app.middleware.auth_guard import AuthGuard
 from app.routes.auth import router as auth_router
 from app.routes.web import router as web_router
