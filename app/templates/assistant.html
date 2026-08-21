@@ -117,7 +117,7 @@ body{
 <textarea class="chat-input" id="chat-input" rows="1" placeholder="Pergunte à Athena..." aria-label="Mensagem para Athena"></textarea>
 <div class="composer-toolbar">
     <button class="composer-btn" type="button" disabled title="Anexos entram em etapa posterior">＋ Anexar</button>
-    <button class="composer-btn" type="button" disabled title="Contexto investigativo local da Platea">Escopo: contexto local</button>
+    <button class="composer-btn" type="button" disabled title="Contexto investigativo local do caso">Escopo: contexto local</button>
     <button class="execution-mode-toggle" id="execution-mode-toggle" type="button" data-mode="safe" title="Safe Mode: execução proporcional ao risco">SAFE</button>
     <div class="composer-spacer"></div>
     <button class="send-btn" id="send-btn" type="button" aria-label="Enviar">
@@ -218,9 +218,9 @@ function addTyping(){
 }
 function updateActiveCase(data){
     const sourceList=Array.isArray(data.sources)?data.sources:(data.source?[data.source]:[]);
-    const refs=sourceList.filter(v=>typeof v==='string'&&v.startsWith('PLATEA:')).map(v=>v.substring('PLATEA:'.length));
+    const refs=sourceList.filter(v=>typeof v==='string'&&v.startsWith('CASE:')).map(v=>v.substring('CASE:'.length));
     if(refs.length===1){activeCaseRef=refs[0];return}
-    const match=String(data.answer||'').match(/\[PLATEA:([^\]]+)\]/i);
+    const match=String(data.answer||'').match(/\[CASE:([^\]]+)\]/i);
     if(match)activeCaseRef=match[1];
 }
 function updateRecentAction(data){

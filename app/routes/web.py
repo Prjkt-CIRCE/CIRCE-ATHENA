@@ -9,6 +9,7 @@ from app.database import SessionLocal
 from app.models.operator import AuditLog, SyncQueue, AssistantExecutionPreference
 from app.models.platea import SharedCase
 from app.services.assistant_context_service import build_investigative_context
+from app.services.workspace_service import build_block_context
 from app.services.audit_service import log_action
 from app.services.assistant_action_service import (
     parse_annotation_command,
@@ -133,6 +134,12 @@ async def assistant_query(request: Request):
     else:
         active_case_ref = None
 
+    active_block_id = body.get("active_block_id")
+    try:
+        active_block_id = int(active_block_id) if active_block_id is not None else None
+    except (TypeError, ValueError):
+        active_block_id = None
+
     recent_action = body.get("recent_action")
     if not isinstance(recent_action, dict):
         recent_action = None
@@ -230,12 +237,12 @@ async def assistant_query(request: Request):
                 return JSONResponse({
                     "answer": (
                         f"Feito. Registrei a anotação no caso {pending_action['case_ref']}. "
-                        f"[PLATEA:{pending_action['case_ref']}] [ANOTACAO:{annotation.id}]"
+                        f"[CASE:{pending_action['case_ref']}] [ANOTACAO:{annotation.id}]"
                     ),
                     "context_mode": "authorized_write_completed",
                     "execution_mode": execution_mode,
                     "risk": decision.risk,
-                    "source": f"PLATEA:{pending_action['case_ref']}",
+                    "source": f"CASE:{pending_action['case_ref']}",
                     "annotation_id": annotation.id,
                     "written_content": pending_action["content"],
                     "authorship_mode": pending_action.get("authorship_mode", "literal"),
@@ -274,8 +281,29 @@ async def assistant_query(request: Request):
 
     db = SessionLocal()
     try:
-        context = build_investigative_context(db, question)
-        source_summary = ", ".join(context.sources) if context.sources else "nenhuma"
+        context = build_investigative_context(
+            db,
+            question,
+            active_case_ref=active_case_ref,
+        )
+        block_context = build_block_context(
+            db,
+            case_ref=active_case_ref,
+            block_id=active_block_id,
+        )
+        context_text = context.text
+        context_sources = list(context.sources)
+        if block_context:
+            context_text += "\n\n" + block_context.text
+            context_sources.extend(
+                source for source in block_context.sources if source not in context_sources
+            )
+        context_mode = (
+            "workspace_block"
+            if block_context
+            else ("workspace_case" if active_case_ref else "local_read_only")
+        )
+        source_summary = ", ".join(context_sources) if context_sources else "nenhuma"
         log_action(
             db,
             action="assistant_context_query",
@@ -300,18 +328,20 @@ async def assistant_query(request: Request):
     system_prompt = (
         "Voce e Athena, a implementacao atual do Assistente de Inteligencia do CIRCE Athena. "
         "Responda de forma tecnica, objetiva e em portugues brasileiro. "
-        "Voce recebeu abaixo um CONTEXTO INVESTIGATIVO LOCAL, obtido da Platea em modo somente leitura. "
+        "Voce recebeu abaixo um CONTEXTO INVESTIGATIVO LOCAL, obtido da base investigativa local em modo somente leitura. "
         "Para qualquer afirmacao especifica sobre casos, pessoas, documentos ou vinculos locais, "
         "use exclusivamente esse contexto. Nunca complete lacunas por suposicao. "
         "Quando a informacao pedida nao estiver presente, diga claramente que ela nao consta "
         "no contexto local disponibilizado. "
-        "Ao usar dados de um caso, indique a fonte no formato [PLATEA:REFERENCIA]. "
+        "Ao usar dados de um caso, indique a fonte no formato [CASE:REFERENCIA]. "
         "Diferencie fatos registrados de inferencias ou hipoteses analiticas. "
-        "Nesta etapa voce NAO pode alterar registros. Se o usuario solicitar alteracao, explique "
-        "que a escrita autorizada sera habilitada em incremento posterior e nao simule a mudanca. "
+        "Ações de escrita suportadas são executadas por uma camada governada antes desta resposta. "
+        "Nunca afirme que uma alteração ocorreu sem confirmação retornada pelo backend. "
+        "Quando houver BLOCO INVESTIGATIVO ativo, trate-o como organização de fontes e raciocínio, "
+        "sem elevar inferências, hipóteses ou texto assistido ao status de fato. "
         "Para perguntas gerais que nao dependam de dados de casos, responda normalmente. "
         "Nunca invente dados de casos, pessoas ou investigacoes reais.\n\n"
-        + context.text
+        + context_text
     )
 
     try:
@@ -344,15 +374,16 @@ async def assistant_query(request: Request):
         answer = data["choices"][0]["message"]["content"]
         return JSONResponse({
             "answer": answer,
-            "sources": context.sources,
-            "context_mode": "local_read_only",
+            "sources": context_sources,
+            "context_mode": context_mode,
+            "active_block_id": block_context.block_id if block_context else None,
         })
     except Exception as e:
         return JSONResponse(
             {
                 "answer": f"Erro ao contactar modelo local: {str(e)}",
-                "sources": context.sources,
-                "context_mode": "local_read_only",
+                "sources": context_sources,
+                "context_mode": context_mode,
             },
             status_code=503,
         )
@@ -436,11 +467,11 @@ async def assistant_action_confirm(request: Request):
             "answer": (
                 f"Anotação registrada no caso {pending['case_ref']} "
                 f"com confirmação do usuário. "
-                f"Fonte local: [PLATEA:{pending['case_ref']}] "
+                f"Fonte local: [CASE:{pending['case_ref']}] "
                 f"[ANOTACAO:{annotation.id}]"
             ),
             "context_mode": "authorized_write_completed",
-            "source": f"PLATEA:{pending['case_ref']}",
+            "source": f"CASE:{pending['case_ref']}",
             "annotation_id": annotation.id,
             "written_content": pending["content"],
             "authorship_mode": pending.get("authorship_mode", "literal"),

@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.workspace-page{margin-left:var(--sidebar-width);height:100vh;display:grid;grid-template-rows:var(--header-height) 1fr;background:var(--bg-base);overflow:hidden}
+.workspace-header{display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--border-subtle);background:rgba(26,27,30,.96)}
+.workspace-header__back{color:var(--text-tertiary);text-decoration:none;font-size:12px}.workspace-header__back:hover{color:var(--text-primary)}
+.workspace-header__title{font-size:16px;font-weight:650;color:var(--text-primary)}
+.workspace-header__case{font-family:var(--font-mono);font-size:10px;color:var(--accent);letter-spacing:.06em}
+.workspace-header__spacer{flex:1}.workspace-header__mode{font-family:var(--font-mono);font-size:10px;border:1px solid var(--border-subtle);border-radius:8px;padding:7px 10px;background:transparent;cursor:pointer;color:var(--success)}
+.workspace-grid{min-height:0;display:grid;grid-template-columns:300px minmax(420px,1fr) 380px}
+.workspace-pane{min-width:0;min-height:0;overflow:auto}.workspace-pane+.workspace-pane{border-left:1px solid var(--border-subtle)}
+.workspace-pane__head{position:sticky;top:0;z-index:2;padding:15px 16px 12px;background:rgba(26,27,30,.97);border-bottom:1px solid var(--border-subtle)}
+.workspace-pane__eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary)}
+.workspace-pane__title{margin-top:4px;font-size:14px;font-weight:650;color:var(--text-primary)}
+.context-section{padding:14px 14px 4px}.context-section__title{font-size:11px;font-weight:650;color:var(--text-secondary);margin-bottom:8px;display:flex;justify-content:space-between}
+.context-item{display:flex;gap:9px;align-items:flex-start;padding:8px 8px;border-radius:8px;color:var(--text-secondary);font-size:12px;line-height:1.35;cursor:pointer}.context-item:hover{background:var(--bg-elevated);color:var(--text-primary)}
+.context-item input{margin-top:2px}.context-item__meta{font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:3px}
+.work-area{padding:18px}.block-form{border:1px solid var(--border-subtle);background:var(--bg-elevated);border-radius:12px;padding:14px;margin-bottom:18px}.block-form__row{display:flex;gap:8px}.block-form input,.block-form textarea{width:100%;border:1px solid var(--border-subtle);background:var(--bg-base);color:var(--text-primary);border-radius:8px;padding:10px 11px;font:inherit;font-size:13px;outline:none}.block-form textarea{min-height:70px;resize:vertical;margin-top:8px}.block-form input:focus,.block-form textarea:focus{border-color:var(--accent)}
+.block-form__hint{margin-top:8px;font-size:10px;color:var(--text-tertiary)}.block-form button{border:0;border-radius:8px;background:var(--accent);color:#0d1317;font-weight:650;padding:0 14px;cursor:pointer;white-space:nowrap}
+/* AT06A_SELECTION_BAR_V2 */
+.context-selection-bar{position:sticky;bottom:0;z-index:3;margin-top:10px;padding:10px 12px 12px;border-top:1px solid var(--border-subtle);background:linear-gradient(to top,var(--bg-base) 78%,rgba(26,27,30,.96));backdrop-filter:blur(6px)}
+.context-selection-bar__count{font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:8px}
+.context-selection-bar__actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.context-selection-bar button{height:30px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:7px;background:transparent;color:var(--text-secondary);font:inherit;font-size:10px;font-weight:550;cursor:pointer}
+.context-selection-bar button:hover:not(:disabled){border-color:var(--border-strong);color:var(--text-primary);background:var(--bg-hover)}
+.context-selection-bar button:disabled{opacity:.34;cursor:not-allowed}
+.block-undo-row{display:flex;justify-content:flex-end;margin:10px 0 4px}
+.block-undo-button{border:1px solid rgba(218,170,80,.35);border-radius:7px;background:rgba(218,170,80,.06);color:var(--warning);padding:7px 10px;font-size:10px;cursor:pointer}
+.block-undo-button:hover{background:rgba(218,170,80,.11)}
+.source-pill{position:relative;padding-right:88px}
+.source-pill__remove{position:absolute;right:8px;top:50%;transform:translateY(-50%);margin:0}
+.source-pill__remove button{border:1px solid var(--border-subtle);border-radius:6px;background:transparent;color:var(--text-tertiary);padding:5px 7px;font-size:9px;cursor:pointer}
+.source-pill__remove button:hover{border-color:var(--border-strong);color:var(--warning)}
+.block-card{display:block;text-decoration:none;border:1px solid var(--border-subtle);border-radius:11px;padding:13px 14px;margin-bottom:10px;background:var(--bg-elevated);color:inherit}.block-card:hover,.block-card--active{border-color:var(--border-strong);background:#202229}.block-card--active{box-shadow:inset 3px 0 0 var(--accent)}
+.block-card__title{font-size:14px;font-weight:650;color:var(--text-primary)}.block-card__summary{font-size:12px;line-height:1.5;color:var(--text-secondary);margin-top:6px}.block-card__meta{margin-top:9px;font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary)}
+.active-block{margin-top:18px;border-top:1px solid var(--border-subtle);padding-top:16px}.source-pill{border:1px solid var(--border-subtle);border-radius:8px;padding:9px 10px;margin-top:7px}.source-pill__type{font-family:var(--font-mono);font-size:8px;color:var(--accent);text-transform:uppercase}.source-pill__label{font-size:12px;color:var(--text-primary);margin-top:3px}.source-pill__key{font-family:var(--font-mono);font-size:8px;color:var(--text-tertiary);margin-top:3px;word-break:break-all}
+.athena-pane{display:grid;grid-template-rows:auto 1fr auto;overflow:hidden}.athena-stream{overflow:auto;padding:16px}.athena-empty{color:var(--text-secondary);font-size:12px;line-height:1.6;padding:8px 2px}.chat-msg{margin-bottom:15px}.chat-msg__who{font-family:var(--font-mono);font-size:8px;letter-spacing:.08em;color:var(--text-tertiary);margin-bottom:5px}.chat-msg--athena .chat-msg__who{color:var(--accent)}.chat-msg__body{font-size:12.5px;line-height:1.6;color:var(--text-primary);white-space:pre-wrap}.chat-msg--user .chat-msg__body{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:9px;padding:9px 10px}.chat-sources{font-family:var(--font-mono);font-size:8px;color:var(--text-tertiary);margin-top:6px;word-break:break-word}
+.athena-compose{border-top:1px solid var(--border-subtle);padding:12px;background:rgba(26,27,30,.98)}.athena-compose textarea{width:100%;min-height:70px;max-height:150px;resize:vertical;border:1px solid var(--border-strong);border-radius:10px;background:var(--bg-elevated);color:var(--text-primary);padding:10px;font:inherit;font-size:13px;outline:none}.athena-compose__row{display:flex;align-items:center;gap:8px;margin-top:8px}.athena-compose__scope{font-family:var(--font-mono);font-size:8px;color:var(--text-tertiary);flex:1}.athena-send{border:0;border-radius:8px;background:var(--accent);color:#0d1317;font-weight:650;padding:8px 13px;cursor:pointer}.athena-send:disabled{opacity:.45}
+.empty-list{padding:8px;color:var(--text-tertiary);font-size:11px}.case-summary{padding:12px 14px;border-bottom:1px solid var(--border-subtle);font-size:11px;color:var(--text-secondary);line-height:1.5}.case-summary strong{color:var(--text-primary)}
+@media(max-width:1100px){.workspace-grid{grid-template-columns:250px minmax(360px,1fr) 330px}}@media(max-width:900px){.workspace-page{margin-left:72px}.workspace-grid{grid-template-columns:1fr}.workspace-pane{min-height:420px}.workspace-pane+.workspace-pane{border-left:0;border-top:1px solid var(--border-subtle)}}
+
+/* AT06A_RESIZABLE_TILING_V1 */
+.workspace-grid{
+  --context-width:300px;
+  --athena-width:380px;
+  grid-template-columns:var(--context-width) 7px minmax(360px,1fr) 7px var(--athena-width);
+}
+.workspace-pane+.workspace-pane{border-left:0}
+.workspace-splitter{
+  position:relative;
+  z-index:8;
+  min-width:7px;
+  width:7px;
+  cursor:col-resize;
+  touch-action:none;
+  user-select:none;
+  background:transparent;
+  border-left:1px solid var(--border-subtle);
+  border-right:1px solid transparent;
+}
+.workspace-splitter:hover,
+.workspace-splitter.is-dragging{
+  background:rgba(95,179,207,.08);
+  border-left-color:rgba(95,179,207,.42);
+  border-right-color:rgba(95,179,207,.18);
+}
+.workspace-splitter__grip{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:2px;
+  height:44px;
+  transform:translate(-50%,-50%);
+  border-radius:999px;
+  background:var(--border-strong);
+  opacity:.52;
+  transition:height .12s ease,opacity .12s ease,background .12s ease;
+}
+.workspace-splitter:hover .workspace-splitter__grip,
+.workspace-splitter.is-dragging .workspace-splitter__grip{
+  height:66px;
+  opacity:1;
+  background:var(--accent);
+}
+body.workspace-resizing{
+  cursor:col-resize!important;
+  user-select:none!important;
+}
+body.workspace-resizing *{
+  cursor:col-resize!important;
+}
+@media(max-width:900px){
+  .workspace-grid{grid-template-columns:1fr!important}
+  .workspace-splitter{display:none}
+}
+
+
+/* AT06A_COLLAPSIBLE_PANES_V1 */
+.workspace-pane__head{position:sticky}
+.pane-collapse-btn{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:25px;height:25px;border:1px solid var(--border-subtle);
+  border-radius:7px;background:transparent;color:var(--text-tertiary);
+  font-size:17px;line-height:1;cursor:pointer;padding:0;
+}
+.pane-collapse-btn:hover{color:var(--accent);border-color:var(--border-strong);background:var(--bg-hover)}
+.workspace-header__layout{
+  margin-right:8px;height:29px;padding:0 9px;border:1px solid var(--border-subtle);
+  border-radius:7px;background:transparent;color:var(--text-tertiary);
+  font-family:var(--font-mono);font-size:8px;letter-spacing:.04em;cursor:pointer;
+}
+.workspace-header__layout:hover{color:var(--text-primary);border-color:var(--border-strong);background:var(--bg-hover)}
+
+.workspace-grid.context-collapsed{
+  grid-template-columns:46px 7px minmax(360px,1fr) 7px var(--athena-width);
+}
+.workspace-grid.work-collapsed{
+  grid-template-columns:var(--context-width) 7px 46px 7px minmax(360px,1fr);
+}
+.workspace-grid.context-collapsed.work-collapsed{
+  grid-template-columns:46px 7px 46px 7px minmax(360px,1fr);
+}
+.workspace-grid.context-collapsed #splitter-context,
+.workspace-grid.work-collapsed #splitter-athena{
+  pointer-events:none;opacity:.25;
+}
+
+.workspace-pane.is-collapsed{overflow:hidden}
+.workspace-pane.is-collapsed > :not(.workspace-pane__head){display:none!important}
+.workspace-pane.is-collapsed .workspace-pane__head{
+  position:relative;top:auto;height:100%;min-height:100%;
+  padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  border-bottom:0;
+}
+.workspace-pane.is-collapsed .workspace-pane__eyebrow{
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  font-size:8px;letter-spacing:.12em;margin-top:30px;
+}
+.workspace-pane.is-collapsed .workspace-pane__title{
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  margin:0;font-size:10px;line-height:1.1;flex:1;color:var(--text-secondary);
+}
+.workspace-pane.is-collapsed .pane-collapse-btn{
+  position:absolute;top:8px;left:50%;right:auto;transform:translateX(-50%);
+}
+@media(max-width:900px){
+  .pane-collapse-btn,.workspace-header__layout{display:none}
+}
+
+</style>
+
+{% include "partials/sidebar.html" %}
+<section class="workspace-page">
+  <header class="workspace-header">
+    <a class="workspace-header__back" href="/platea/{{ case.case_ref }}">&larr; Gestor de Investiga&ccedil;&otilde;es</a>
+    <div>
+      <div class="workspace-header__title">{{ case.title }}</div>
+      <div class="workspace-header__case">{{ case.case_ref }} · WORKSPACE {{ workspace.id }}</div>
+    </div>
+    <div class="workspace-header__spacer"></div>
+    <button class="workspace-header__layout" id="reset-workspace-layout" type="button" title="Restaurar larguras e painéis">Restaurar layout</button>
+    <button class="workspace-header__mode" id="workspace-mode" type="button" data-mode="safe">SAFE</button>
+  </header>
+
+  <div class="workspace-grid" id="workspace-grid">
+    <aside class="workspace-pane workspace-pane--context" id="pane-context">
+      <div class="workspace-pane__head">
+        <div class="workspace-pane__eyebrow">Contexto</div>
+        <div class="workspace-pane__title">Elementos do caso</div>
+        <button class="pane-collapse-btn" id="toggle-context-pane" type="button" aria-label="Colapsar Elementos do caso" title="Colapsar Elementos do caso">‹</button>
+      </div>
+      <div class="case-summary"><strong>{{ case.case_ref }}</strong><br>{{ case.classification or 'Sem classificação informada' }}</div>
+
+      <div class="context-section">
+        <div class="context-section__title"><span>Pessoas</span><span>{{ persons|length }}</span></div>
+        {% for item in persons %}
+        <label class="context-item">
+          <input form="create-block-form" type="checkbox" name="sources" value="person:{{ item.id }}">
+          <span><span>{{ item.full_name }}</span><div class="context-item__meta">{{ item.person_ref or item.cpf or item.rg or 'sem referência externa' }}</div></span>
+        </label>
+        {% else %}<div class="empty-list">Nenhuma pessoa.</div>{% endfor %}
+      </div>
+
+      <div class="context-section">
+        <div class="context-section__title"><span>Documentos</span><span>{{ documents|length }}</span></div>
+        {% for item in documents %}
+        <label class="context-item">
+          <input form="create-block-form" type="checkbox" name="sources" value="document:{{ item.id }}">
+          <span><span>{{ item.filename }}</span><div class="context-item__meta">{{ item.document_ref or (item.sha256[:16] ~ '…' if item.sha256 else 'sem hash') }}</div></span>
+        </label>
+        {% else %}<div class="empty-list">Nenhum documento.</div>{% endfor %}
+      </div>
+
+      <div class="context-section">
+        <div class="context-section__title"><span>Vínculos</span><span>{{ links|length }}</span></div>
+        {% for item in links %}
+        <label class="context-item">
+          <input form="create-block-form" type="checkbox" name="sources" value="link:{{ item.id }}">
+          <span><span>{{ item.entity_a_name or item.entity_a_ref }} → {{ item.entity_b_name or item.entity_b_ref }}</span><div class="context-item__meta">{{ item.link_type }} · {{ item.link_nature or 'natureza não informada' }}</div></span>
+        </label>
+        {% else %}<div class="empty-list">Nenhum vínculo.</div>{% endfor %}
+      </div>
+
+      <div class="context-section">
+        <div class="context-section__title"><span>Anotações</span><span>{{ annotations|length }}</span></div>
+        {% for item in annotations %}
+        <label class="context-item">
+          <input form="create-block-form" type="checkbox" name="sources" value="annotation:{{ item.id }}">
+          <span><span>{{ item.content[:120] }}{% if item.content|length > 120 %}…{% endif %}</span><div class="context-item__meta">{{ item.created_by_username }} · {{ item.source }}</div></span>
+        </label>
+        {% else %}<div class="empty-list">Nenhuma anotação.</div>{% endfor %}
+      </div>
+
+      <div class="context-selection-bar" id="context-selection-bar">
+        <div class="context-selection-bar__count" id="selection-count">0 elementos selecionados</div>
+        <div class="context-selection-bar__actions">
+          <button id="undo-selection" type="button" disabled>Desfazer</button>
+          <button id="clear-selection" type="button" disabled>Limpar</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace-splitter" id="splitter-context" role="separator" aria-orientation="vertical" aria-label="Redimensionar contexto e trabalho" title="Arraste para redimensionar. Duplo clique restaura o layout.">
+      <span class="workspace-splitter__grip"></span>
+    </div>
+
+    <main class="workspace-pane workspace-pane--work" id="pane-work">
+      <div class="workspace-pane__head">
+        <div class="workspace-pane__eyebrow">Trabalho</div>
+        <div class="workspace-pane__title">Blocos investigativos</div>
+        <button class="pane-collapse-btn" id="toggle-work-pane" type="button" aria-label="Colapsar Blocos investigativos" title="Colapsar Blocos investigativos">›</button>
+      </div>
+      <div class="work-area">
+        <form class="block-form" id="create-block-form" method="post" action="/api/workspaces/{{ workspace.id }}/blocks">
+          <div class="block-form__row">
+            <input name="title" maxlength="256" required placeholder="Título do bloco — ex.: Vínculo João ↔ Empresa X">
+            <button type="submit">Criar bloco</button>
+          </div>
+          <textarea name="summary" maxlength="4000" placeholder="Resumo opcional do raciocínio ou ponto que você quer investigar."></textarea>
+          <div class="block-form__hint">Selecione à esquerda os elementos que sustentam ou contextualizam este bloco.</div>
+        </form>
+
+        {% for item in blocks %}
+        <a class="block-card {% if active_block and active_block.id == item.id %}block-card--active{% endif %}" href="/workspace/{{ case.case_ref }}?block={{ item.id }}">
+          <div class="block-card__title">{{ item.title }}</div>
+          {% if item.summary %}<div class="block-card__summary">{{ item.summary }}</div>{% endif %}
+          <div class="block-card__meta">BLOCO {{ item.id }} · {{ item.sources|length }} fonte(s) · {{ item.status }}</div>
+        </a>
+        {% else %}
+        <div class="empty-list">Ainda não há blocos. Selecione elementos do caso e crie o primeiro.</div>
+        {% endfor %}
+
+        {% if active_block %}
+        <section class="active-block">
+          <div class="workspace-pane__eyebrow">Bloco ativo</div>
+          <div class="workspace-pane__title">{{ active_block.title }}</div>
+          {% if active_block.summary %}<p style="font-size:12px;line-height:1.6;color:var(--text-secondary)">{{ active_block.summary }}</p>{% endif %}
+          <div class="block-undo-row">
+            <form method="post" action="/api/workspaces/{{ workspace.id }}/blocks/{{ active_block.id }}/undo" onsubmit="return confirm('Desfazer a criação deste bloco? O caso e as fontes originais não serão alterados.');">
+              <button class="block-undo-button" type="submit">Desfazer criação do bloco</button>
+            </form>
+          </div>
+          {% for source in active_block.sources %}
+          <div class="source-pill">
+            <div class="source-pill__type">{{ source.source_type }}</div>
+            <div class="source-pill__label">{{ source.source_label_snapshot }}</div>
+            <div class="source-pill__key">{{ source.source_key }}</div>
+            <form class="source-pill__remove" method="post" action="/api/workspaces/{{ workspace.id }}/blocks/{{ active_block.id }}/sources/{{ source.id }}/remove" onsubmit="return confirm('Remover esta fonte apenas deste bloco? O elemento original do caso será preservado.');">
+              <button type="submit">Remover</button>
+            </form>
+          </div>
+          {% endfor %}
+        </section>
+        {% endif %}
+      </div>
+    </main>
+
+    <div class="workspace-splitter" id="splitter-athena" role="separator" aria-orientation="vertical" aria-label="Redimensionar trabalho e Athena" title="Arraste para redimensionar. Duplo clique restaura o layout.">
+      <span class="workspace-splitter__grip"></span>
+    </div>
+
+    <aside class="workspace-pane athena-pane">
+      <div class="workspace-pane__head">
+        <div class="workspace-pane__eyebrow">Athena</div>
+        <div class="workspace-pane__title">{% if active_block %}Contexto do bloco {{ active_block.id }}{% else %}Contexto do caso{% endif %}</div>
+      </div>
+      <div class="athena-stream" id="athena-stream">
+        <div class="athena-empty" id="athena-empty">
+          Athena já conhece o caso ativo{% if active_block %} e as fontes do bloco selecionado{% endif %}. Pergunte, compare ou peça uma anotação sem precisar repetir o contexto.
+        </div>
+      </div>
+      <div class="athena-compose">
+        <textarea id="athena-input" placeholder="Pergunte à Athena sobre este contexto..."></textarea>
+        <div class="athena-compose__row">
+          <div class="athena-compose__scope">CASO {{ case.case_ref }}{% if active_block %} · BLOCO {{ active_block.id }}{% endif %}</div>
+          <button class="athena-send" id="athena-send" type="button">Enviar</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+(function(){
+const caseRef={{ case.case_ref|tojson }};
+const activeBlockId={{ active_block.id if active_block else 'null' }};
+const input=document.getElementById('athena-input');
+const send=document.getElementById('athena-send');
+const stream=document.getElementById('athena-stream');
+const empty=document.getElementById('athena-empty');
+const modeBtn=document.getElementById('workspace-mode');
+
+// AT06A_RESIZABLE_TILING_V1
+const workspaceGrid=document.getElementById('workspace-grid');
+const contextPane=workspaceGrid?.querySelector('.workspace-pane:first-child');
+const athenaPane=workspaceGrid?.querySelector('.athena-pane');
+const splitterContext=document.getElementById('splitter-context');
+const splitterAthena=document.getElementById('splitter-athena');
+const layoutStorageKey='circe-athena.workspace.layout.v1';
+const layoutDefaults={context:300,athena:380};
+const layoutLimits={contextMin:220,contextMax:560,athenaMin:300,athenaMax:760,workMin:360,gutters:14};
+
+function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
+function currentPaneWidths(){
+  return {
+    context:contextPane?Math.round(contextPane.getBoundingClientRect().width):layoutDefaults.context,
+    athena:athenaPane?Math.round(athenaPane.getBoundingClientRect().width):layoutDefaults.athena
+  };
+}
+function fitLayout(contextWidth,athenaWidth){
+  if(!workspaceGrid)return layoutDefaults;
+  const total=workspaceGrid.getBoundingClientRect().width;
+  let left=clamp(Number(contextWidth)||layoutDefaults.context,layoutLimits.contextMin,layoutLimits.contextMax);
+  let right=clamp(Number(athenaWidth)||layoutDefaults.athena,layoutLimits.athenaMin,layoutLimits.athenaMax);
+  const available=Math.max(
+    layoutLimits.contextMin+layoutLimits.athenaMin,
+    total-layoutLimits.workMin-layoutLimits.gutters
+  );
+  if(left+right>available){
+    let excess=left+right-available;
+    const rightCanShrink=Math.max(0,right-layoutLimits.athenaMin);
+    const rightShrink=Math.min(excess,rightCanShrink);
+    right-=rightShrink;
+    excess-=rightShrink;
+    if(excess>0)left=Math.max(layoutLimits.contextMin,left-excess);
+  }
+  return {context:Math.round(left),athena:Math.round(right)};
+}
+function applyLayout(layout,persist=false){
+  if(!workspaceGrid||window.matchMedia('(max-width: 900px)').matches)return;
+  const fitted=fitLayout(layout.context,layout.athena);
+  workspaceGrid.style.setProperty('--context-width',fitted.context+'px');
+  workspaceGrid.style.setProperty('--athena-width',fitted.athena+'px');
+  if(persist){
+    try{localStorage.setItem(layoutStorageKey,JSON.stringify(fitted))}catch(_){}
+  }
+}
+function loadLayout(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(layoutStorageKey)||'null')}catch(_){}
+  applyLayout(saved||layoutDefaults,false);
+}
+function resetLayout(){
+  try{localStorage.removeItem(layoutStorageKey)}catch(_){}
+  applyLayout(layoutDefaults,true);
+}
+function bindSplitter(splitter,side){
+  if(!splitter||!workspaceGrid)return;
+  let dragging=false;
+  const stop=()=>{
+    if(!dragging)return;
+    dragging=false;
+    splitter.classList.remove('is-dragging');
+    document.body.classList.remove('workspace-resizing');
+    applyLayout(currentPaneWidths(),true);
+  };
+  splitter.addEventListener('pointerdown',event=>{
+    if(window.matchMedia('(max-width: 900px)').matches)return;
+    dragging=true;
+    splitter.setPointerCapture?.(event.pointerId);
+    splitter.classList.add('is-dragging');
+    document.body.classList.add('workspace-resizing');
+    event.preventDefault();
+  });
+  splitter.addEventListener('pointermove',event=>{
+    if(!dragging)return;
+    const rect=workspaceGrid.getBoundingClientRect();
+    const widths=currentPaneWidths();
+    if(side==='context'){
+      const maxLeft=Math.min(
+        layoutLimits.contextMax,
+        rect.width-widths.athena-layoutLimits.workMin-layoutLimits.gutters
+      );
+      const next=clamp(event.clientX-rect.left,layoutLimits.contextMin,Math.max(layoutLimits.contextMin,maxLeft));
+      applyLayout({context:next,athena:widths.athena},false);
+    }else{
+      const maxRight=Math.min(
+        layoutLimits.athenaMax,
+        rect.width-widths.context-layoutLimits.workMin-layoutLimits.gutters
+      );
+      const next=clamp(rect.right-event.clientX,layoutLimits.athenaMin,Math.max(layoutLimits.athenaMin,maxRight));
+      applyLayout({context:widths.context,athena:next},false);
+    }
+  });
+  splitter.addEventListener('pointerup',stop);
+  splitter.addEventListener('pointercancel',stop);
+  splitter.addEventListener('dblclick',resetLayout);
+}
+bindSplitter(splitterContext,'context');
+bindSplitter(splitterAthena,'athena');
+loadLayout();
+window.addEventListener('resize',()=>{
+  if(!window.matchMedia('(max-width: 900px)').matches){
+    applyLayout(currentPaneWidths(),false);
+  }
+});
+
+// AT06A_UNDO_V1
+// AT06A_COLLAPSIBLE_PANES_V1
+const paneContext=document.getElementById('pane-context');
+const paneWork=document.getElementById('pane-work');
+const toggleContextPane=document.getElementById('toggle-context-pane');
+const toggleWorkPane=document.getElementById('toggle-work-pane');
+const resetWorkspaceLayout=document.getElementById('reset-workspace-layout');
+const collapseStorageKey='circe-athena.workspace.collapse.v1';
+
+function readCollapseState(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(collapseStorageKey)||'{}');
+    return {context:Boolean(raw.context),work:Boolean(raw.work)};
+  }catch(_){return {context:false,work:false}}
+}
+function saveCollapseState(state){
+  try{localStorage.setItem(collapseStorageKey,JSON.stringify(state))}catch(_){}
+}
+function applyCollapseState(state,persist=false){
+  if(!workspaceGrid||window.matchMedia('(max-width: 900px)').matches)return;
+  paneContext?.classList.toggle('is-collapsed',Boolean(state.context));
+  paneWork?.classList.toggle('is-collapsed',Boolean(state.work));
+  workspaceGrid.classList.toggle('context-collapsed',Boolean(state.context));
+  workspaceGrid.classList.toggle('work-collapsed',Boolean(state.work));
+
+  if(toggleContextPane){
+    toggleContextPane.textContent=state.context?'›':'‹';
+    toggleContextPane.title=state.context?'Expandir Elementos do caso':'Colapsar Elementos do caso';
+    toggleContextPane.setAttribute('aria-label',toggleContextPane.title);
+    toggleContextPane.setAttribute('aria-expanded',String(!state.context));
+  }
+  if(toggleWorkPane){
+    toggleWorkPane.textContent=state.work?'‹':'›';
+    toggleWorkPane.title=state.work?'Expandir Blocos investigativos':'Colapsar Blocos investigativos';
+    toggleWorkPane.setAttribute('aria-label',toggleWorkPane.title);
+    toggleWorkPane.setAttribute('aria-expanded',String(!state.work));
+  }
+  if(persist)saveCollapseState(state);
+}
+toggleContextPane?.addEventListener('click',()=>{
+  const state=readCollapseState();
+  state.context=!state.context;
+  applyCollapseState(state,true);
+});
+toggleWorkPane?.addEventListener('click',()=>{
+  const state=readCollapseState();
+  state.work=!state.work;
+  applyCollapseState(state,true);
+});
+resetWorkspaceLayout?.addEventListener('click',()=>{
+  try{localStorage.removeItem(collapseStorageKey)}catch(_){}
+  applyCollapseState({context:false,work:false},false);
+  resetLayout();
+});
+applyCollapseState(readCollapseState(),false);
+
+const sourceCheckboxes=Array.from(document.querySelectorAll('input[form="create-block-form"][name="sources"]'));
+const undoSelectionBtn=document.getElementById('undo-selection');
+const clearSelectionBtn=document.getElementById('clear-selection');
+const selectionCount=document.getElementById('selection-count');
+let selectionHistory=[];
+let history=[];let recentAction=null;let busy=false;
+
+function selectionSnapshot(){return sourceCheckboxes.map(item=>item.checked)}
+function restoreSelection(snapshot){
+  sourceCheckboxes.forEach((item,index)=>{item.checked=Boolean(snapshot[index])});
+  updateSelectionControls();
+}
+function updateSelectionControls(){
+  const count=sourceCheckboxes.filter(item=>item.checked).length;
+  selectionCount.textContent=count===1?'1 elemento selecionado':count+' elementos selecionados';
+  undoSelectionBtn.disabled=selectionHistory.length===0;
+  clearSelectionBtn.disabled=count===0;
+}
+sourceCheckboxes.forEach((item,index)=>{
+  item.addEventListener('change',()=>{
+    const before=selectionSnapshot();
+    before[index]=!item.checked;
+    selectionHistory.push(before);
+    if(selectionHistory.length>50)selectionHistory.shift();
+    updateSelectionControls();
+  });
+});
+undoSelectionBtn.addEventListener('click',()=>{
+  const previous=selectionHistory.pop();
+  if(previous)restoreSelection(previous);
+});
+clearSelectionBtn.addEventListener('click',()=>{
+  const before=selectionSnapshot();
+  if(!before.some(Boolean))return;
+  selectionHistory.push(before);
+  sourceCheckboxes.forEach(item=>{item.checked=false});
+  updateSelectionControls();
+});
+updateSelectionControls();
+
+const createBlockForm=document.getElementById('create-block-form');
+createBlockForm.addEventListener('submit',event=>{
+  const count=sourceCheckboxes.filter(item=>item.checked).length;
+  if(count===0){
+    event.preventDefault();
+    alert('Selecione pelo menos um elemento do caso antes de criar o bloco.');
+  }
+});
+
+function addMessage(kind,text,sources){
+  if(empty)empty.remove();
+  const box=document.createElement('div');box.className='chat-msg chat-msg--'+kind;
+  const who=document.createElement('div');who.className='chat-msg__who';who.textContent=kind==='athena'?'ATHENA':'VOCÊ';
+  const body=document.createElement('div');body.className='chat-msg__body';body.textContent=text||'';
+  box.append(who,body);
+  if(Array.isArray(sources)&&sources.length){const src=document.createElement('div');src.className='chat-sources';src.textContent='Fontes: '+sources.join(' · ');box.appendChild(src)}
+  stream.appendChild(box);stream.scrollTop=stream.scrollHeight;
+}
+function setMode(mode){const value=mode==='agent'?'agent':'safe';modeBtn.dataset.mode=value;modeBtn.textContent=value.toUpperCase();modeBtn.style.color=value==='agent'?'var(--warning)':'var(--success)'}
+async function loadMode(){try{const r=await fetch('/api/assistant/execution-mode');const d=await r.json();setMode(d.mode)}catch(_){setMode('safe')}}
+modeBtn.addEventListener('click',async()=>{const next=modeBtn.dataset.mode==='agent'?'safe':'agent';modeBtn.disabled=true;try{const r=await fetch('/api/assistant/execution-mode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:next})});const d=await r.json();if(r.ok)setMode(d.mode)}finally{modeBtn.disabled=false}});
+
+async function ask(){
+  const question=input.value.trim();if(!question||busy)return;busy=true;send.disabled=true;input.value='';addMessage('user',question);const requestHistory=history.slice(-8);history.push({role:'user',content:question});
+  try{
+    const r=await fetch('/api/assistant/query',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question,history:requestHistory,active_case_ref:caseRef,active_block_id:activeBlockId,recent_action:recentAction})});
+    const d=await r.json();addMessage('athena',d.answer||'Athena não retornou conteúdo.',d.sources);history.push({role:'assistant',content:d.answer||''});
+    if(d.annotation_id!=null&&typeof d.written_content==='string'){recentAction={type:'case_annotation',case_ref:d.case_ref||caseRef,annotation_id:d.annotation_id,content:d.written_content,authorship_mode:d.authorship_mode||'literal'}}
+  }catch(_){addMessage('athena','Não foi possível contactar o serviço local da Athena.')}finally{busy=false;send.disabled=false;input.focus()}
+}
+send.addEventListener('click',ask);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask()}});loadMode();
+})();
+</script>
+{% endblock %}

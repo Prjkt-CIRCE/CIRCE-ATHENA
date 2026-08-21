@@ -13,9 +13,10 @@ from app.routes.web import router as web_router
 from app.routes.photos import router as photos_router
 from app.routes.sync import router as sync_router
 from app.routes.platea import router as platea_router
+from app.routes.workspace import router as workspace_router
 
-# Cria tabelas novas que ainda nao existam (backup ao Alembic)
-Base.metadata.create_all(bind=engine)
+# Evolução de schema é responsabilidade do Alembic.
+# Antes de iniciar uma versão nova da aplicação, execute: alembic upgrade head
 
 app = FastAPI(title="CIRCE Athena", docs_url=None, redoc_url=None)
 app.add_middleware(AuthGuard)
@@ -25,6 +26,7 @@ app.include_router(web_router)
 app.include_router(photos_router)
 app.include_router(sync_router)
 app.include_router(platea_router)
+app.include_router(workspace_router)
 
 if __name__ == "__main__":
     print("=" * 52)

@@ -1,7 +1,7 @@
 """
 AT-05.1 — Contexto Investigativo Local v3
 
-Seleção determinística de contexto Platea para o Assistente.
+Seleção determinística de contexto investigativo local para o Assistente.
 Somente leitura. Nenhuma escrita investigativa é executada aqui.
 """
 
@@ -108,7 +108,7 @@ def _format_link(link) -> str:
 
 def _serialize_case(case: SharedCase) -> str:
     lines = [
-        f"[PLATEA:{case.case_ref}]",
+        f"[CASE:{case.case_ref}]",
         f"titulo: {case.title}",
         f"status: {case.status}",
     ]
@@ -169,6 +169,7 @@ def _empty_context(message: str) -> InvestigativeContext:
 def build_investigative_context(
     db: Session,
     question: str,
+    active_case_ref: str | None = None,
 ) -> InvestigativeContext:
     cases = (
         db.query(SharedCase)
@@ -187,11 +188,11 @@ def build_investigative_context(
     )
 
     if not cases:
-        return _empty_context("Nenhum caso esta registrado na Platea local.")
+        return _empty_context("Nenhum caso está registrado na base investigativa local.")
 
     explicit_ref = _extract_explicit_case_ref(question)
 
-    # 1. Referência explícita tem prioridade máxima.
+    # 1. Referência explícita do usuário tem prioridade máxima.
     if explicit_ref:
         exact = [
             case
@@ -200,9 +201,22 @@ def build_investigative_context(
         ]
         if not exact:
             return _empty_context(
-                f"O caso solicitado ({explicit_ref}) nao foi encontrado na Platea local."
+                f"O caso solicitado ({explicit_ref}) nao foi encontrado na base investigativa local."
             )
         selected = exact[:1]
+
+    # 2. Dentro do Workspace, o caso ativo é o escopo padrão.
+    elif active_case_ref:
+        active = [
+            case
+            for case in cases
+            if _normalize(case.case_ref).lower() == active_case_ref.lower()
+        ]
+        if not active:
+            return _empty_context(
+                f"O caso ativo ({active_case_ref}) nao foi encontrado na base investigativa local."
+            )
+        selected = active[:1]
 
     else:
         q = question.lower()
@@ -243,10 +257,10 @@ def build_investigative_context(
 
     if not selected:
         return _empty_context(
-            "A consulta nao encontrou registros compativeis na Platea local."
+            "A consulta nao encontrou registros compativeis na base investigativa local."
         )
 
-    sources = [f"PLATEA:{case.case_ref}" for case in selected]
+    sources = [f"CASE:{case.case_ref}" for case in selected]
     text = (
         "CONTEXTO INVESTIGATIVO LOCAL — SOMENTE LEITURA\n"
         "Use somente os registros abaixo para afirmacoes especificas sobre "

@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <!-- ATHENA_UI_STANDARDIZATION_V1 -->
 <style>
@@ -179,8 +179,8 @@
   <!-- AREA PRINCIPAL -->
   <div class="main-area">
     <div class="page-header">
-      <span class="page-header__title">Platea</span>
-      <span class="page-header__subtitle">{{ total }} caso(s) compartilhado(s)</span>
+      <span class="page-header__title">Gestor de Investigações</span>
+      <span class="page-header__subtitle">{{ total }} caso(s) disponível(is)</span>
       <div class="page-header__spacer"></div>
       <div class="page-header__user">
         <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
@@ -200,7 +200,7 @@
       <!-- AVISO LEGAL -->
       <div class="alert alert--info" style="margin-bottom:20px">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>
-        <span>Todos os acessos a casos nesta area sao registrados no log de auditoria. Os dados exibidos foram publicados voluntariamente pelos operadores de origem.</span>
+        <span>Todos os acessos a casos nesta área são registrados no log de auditoria. Cada registro mantém sua origem para fins de proveniência e rastreabilidade.</span>
       </div>
 
       {% if cases %}
@@ -267,9 +267,9 @@
 
       {% else %}
       <div class="card" style="padding:48px;text-align:center">
-        <div style="color:var(--text-tertiary);font-size:13px">Nenhum caso compartilhado na Platea ainda.</div>
+        <div style="color:var(--text-tertiary);font-size:13px">Nenhum caso disponível no Gestor de Investigações.</div>
         <div style="color:var(--text-tertiary);font-size:12px;margin-top:8px">
-          Casos sao publicados pelo Intel Desk quando o operador marca "Compartilhar na Platea".
+          Casos aparecerão aqui conforme as fontes e os fluxos de integração habilitados para o núcleo.
         </div>
       </div>
       {% endif %}
@@ -283,7 +283,7 @@
     <span class="status-bar__sep">|</span>
     <span>{{ operator.username if operator else "" }}</span>
     <span class="status-bar__sep">|</span>
-    <span>Platea</span>
+    <span>Gestor de Investigações</span>
     <span class="status-bar__sep">|</span>
     <span>{{ total }} caso(s)</span>
   </div>

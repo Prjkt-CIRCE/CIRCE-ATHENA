@@ -75,7 +75,7 @@ def build_pending_annotation(
     )
 
     if not case:
-        return None, f"O caso {command.case_ref} não foi encontrado na Platea local."
+        return None, f"O caso {command.case_ref} não foi encontrado na base investigativa local."
 
     action = {
         "action_id": secrets.token_urlsafe(18),
