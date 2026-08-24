@@ -285,6 +285,7 @@ async def assistant_query(request: Request):
             db,
             question,
             active_case_ref=active_case_ref,
+            operator_username=operator.get("username"),
         )
         block_context = build_block_context(
             db,
@@ -339,6 +340,9 @@ async def assistant_query(request: Request):
         "Nunca afirme que uma alteração ocorreu sem confirmação retornada pelo backend. "
         "Quando houver BLOCO INVESTIGATIVO ativo, trate-o como organização de fontes e raciocínio, "
         "sem elevar inferências, hipóteses ou texto assistido ao status de fato. "
+        "Quando houver ACHADOS INVESTIGATIVOS VALIDADOS, respeite rigorosamente seu tipo epistemológico: "
+        "fato, declaração, anotação, inferência, hipótese ou pendência. Validação humana não transforma "
+        "inferência ou hipótese em fato. "
         "Para perguntas gerais que nao dependam de dados de casos, responda normalmente. "
         "Nunca invente dados de casos, pessoas ou investigacoes reais.\n\n"
         + context_text

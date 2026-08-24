@@ -16,6 +16,10 @@ class SharedCase(Base):
 
     id:                Mapped[int]           = mapped_column(Integer, primary_key=True, autoincrement=True)
     case_ref:          Mapped[str]           = mapped_column(String(64),  nullable=False, unique=True)
+    case_uuid:         Mapped[Optional[str]] = mapped_column(String(64),  nullable=True, unique=True, index=True)
+    origin_type:       Mapped[str]           = mapped_column(String(32),  nullable=False, default="external_sync")
+    created_by_operator_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    created_by_username: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
     title:             Mapped[str]           = mapped_column(String(256), nullable=False)
     status:            Mapped[str]           = mapped_column(String(32),  nullable=False)
     classification:    Mapped[Optional[str]] = mapped_column(String(64),  nullable=True)
@@ -62,6 +66,13 @@ class SharedDocument(Base):
     sha256:         Mapped[Optional[str]] = mapped_column(String(64),  nullable=True)
     description:    Mapped[Optional[str]] = mapped_column(Text,        nullable=True)
     imported_at:    Mapped[Optional[str]] = mapped_column(String(32),  nullable=True)
+    storage_path:   Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    mime_type:      Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    file_size:      Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    intake_bin:     Mapped[str]           = mapped_column(String(64), nullable=False, default="documents")
+    origin:         Mapped[str]           = mapped_column(String(64), nullable=False, default="external_sync")
+    uploaded_by_username: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    uploaded_at:    Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     case: Mapped["SharedCase"] = relationship(back_populates="documents")
 

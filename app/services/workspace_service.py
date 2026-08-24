@@ -103,7 +103,7 @@ def list_blocks(db: Session, workspace_id: int) -> list[InvestigativeBlock]:
     )
 
 
-def _source_from_token(db: Session, case: SharedCase, token: str) -> dict | None:
+def resolve_case_source_token(db: Session, case: SharedCase, token: str) -> dict | None:
     if not isinstance(token, str) or ":" not in token:
         return None
     source_type, raw_id = token.split(":", 1)
@@ -252,7 +252,7 @@ def create_block(
     resolved: list[dict] = []
     seen: set[tuple[str, str]] = set()
     for token in unique_tokens:
-        item = _source_from_token(db, case, token)
+        item = resolve_case_source_token(db, case, token)
         if not item:
             return None, f"Fonte inválida ou fora do caso: {token}."
         identity = (item["source_type"], item["source_key"])
@@ -294,6 +294,86 @@ def create_block(
     workspace.updated_at = now
     db.flush()
     return block, None
+
+
+# AT06A_POOL_DND_V1
+def add_block_sources(
+    db: Session,
+    *,
+    workspace_id: int,
+    block_id: int,
+    source_tokens: list[str],
+) -> tuple[InvestigativeBlock | None, list[InvestigativeBlockSource], str | None]:
+    block = (
+        db.query(InvestigativeBlock)
+        .options(selectinload(InvestigativeBlock.sources))
+        .filter(
+            InvestigativeBlock.id == block_id,
+            InvestigativeBlock.workspace_id == workspace_id,
+            InvestigativeBlock.status != "discarded",
+        )
+        .first()
+    )
+    if not block:
+        return None, [], "Bloco investigativo não encontrado."
+
+    workspace = db.query(InvestigativeWorkspace).filter_by(id=workspace_id).first()
+    if not workspace:
+        return None, [], "Workspace não encontrado."
+
+    case = db.query(SharedCase).filter_by(id=workspace.shared_case_id).first()
+    if not case:
+        return None, [], "Caso associado ao Workspace não foi encontrado."
+
+    unique_tokens = list(dict.fromkeys(source_tokens or []))
+    if not unique_tokens:
+        return block, [], "Nenhuma fonte foi informada."
+
+    existing = {(item.source_type, item.source_key) for item in block.sources}
+    available_slots = MAX_BLOCK_SOURCES - len(existing)
+    if available_slots <= 0:
+        return block, [], f"O bloco já atingiu o limite de {MAX_BLOCK_SOURCES} fontes."
+
+    resolved: list[dict] = []
+    seen = set(existing)
+    for token in unique_tokens:
+        item = resolve_case_source_token(db, case, token)
+        if not item:
+            return block, [], f"Fonte inválida ou fora do caso: {token}."
+        identity = (item["source_type"], item["source_key"])
+        if identity in seen:
+            continue
+        seen.add(identity)
+        resolved.append(item)
+        if len(resolved) >= available_slots:
+            break
+
+    if not resolved:
+        return block, [], None
+
+    now = _utcnow()
+    start_position = len(block.sources)
+    added: list[InvestigativeBlockSource] = []
+
+    for offset, item in enumerate(resolved):
+        source = InvestigativeBlockSource(
+            block_id=block.id,
+            source_type=item["source_type"],
+            source_key=item["source_key"],
+            source_label_snapshot=item["label"],
+            source_snapshot=json.dumps(item["snapshot"], ensure_ascii=False, sort_keys=True),
+            relation="context",
+            position=start_position + offset,
+            added_at=now,
+        )
+        db.add(source)
+        added.append(source)
+
+    block.updated_at = now
+    workspace.updated_at = now
+    db.flush()
+    block.sources.extend(item for item in added if item not in block.sources)
+    return block, added, None
 
 
 # AT06A_UNDO_V1

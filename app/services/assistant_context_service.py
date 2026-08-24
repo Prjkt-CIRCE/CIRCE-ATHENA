@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.platea import SharedCase
+from app.models.workspace import InvestigativeExcerpt, InvestigativeFinding, InvestigativeWorkspace
+from app.services.report_archive_service import archive_context_text, search_report_archive
 
 
 MAX_CONTEXT_CASES = 8
@@ -170,6 +172,7 @@ def build_investigative_context(
     db: Session,
     question: str,
     active_case_ref: str | None = None,
+    operator_username: str | None = None,
 ) -> InvestigativeContext:
     cases = (
         db.query(SharedCase)
@@ -191,6 +194,9 @@ def build_investigative_context(
         return _empty_context("Nenhum caso está registrado na base investigativa local.")
 
     explicit_ref = _extract_explicit_case_ref(question)
+    archive_results = [] if active_case_ref else search_report_archive(
+        db, question, owner_username=operator_username, limit=8
+    )
 
     # 1. Referência explícita do usuário tem prioridade máxima.
     if explicit_ref:
@@ -217,6 +223,22 @@ def build_investigative_context(
                 f"O caso ativo ({active_case_ref}) nao foi encontrado na base investigativa local."
             )
         selected = active[:1]
+
+    elif archive_results:
+        archive_case_ids = [item[0].shared_case_id for item in archive_results][:MAX_CONTEXT_CASES]
+        archived_cases = (
+            db.query(SharedCase)
+            .options(
+                selectinload(SharedCase.persons),
+                selectinload(SharedCase.documents),
+                selectinload(SharedCase.links),
+                selectinload(SharedCase.annotations),
+            )
+            .filter(SharedCase.id.in_(archive_case_ids))
+            .all()
+        )
+        archived_by_id = {case.id: case for case in archived_cases}
+        selected = [archived_by_id[item_id] for item_id in archive_case_ids if item_id in archived_by_id]
 
     else:
         q = question.lower()
@@ -267,6 +289,62 @@ def build_investigative_context(
         "casos, pessoas, documentos ou vinculos. Cada bloco inicia com sua fonte.\n\n"
         + "\n\n".join(_serialize_case(case) for case in selected)
     )
+
+    # AT06B1_ANALYTICAL_CORE_V1 — Achados validados passam a integrar o contexto local.
+    finding_sections: list[str] = []
+    for case in selected:
+        workspace = (
+            db.query(InvestigativeWorkspace)
+            .filter(InvestigativeWorkspace.shared_case_id == case.id)
+            .first()
+        )
+        if not workspace:
+            continue
+        findings = (
+            db.query(InvestigativeFinding)
+            .options(
+                selectinload(InvestigativeFinding.excerpt)
+                .selectinload(InvestigativeExcerpt.sources)
+            )
+            .filter(
+                InvestigativeFinding.workspace_id == workspace.id,
+                InvestigativeFinding.status == "validated",
+            )
+            .order_by(InvestigativeFinding.validated_at.asc(), InvestigativeFinding.id.asc())
+            .all()
+        )
+        if not findings:
+            continue
+
+        lines = [
+            f"ACHADOS INVESTIGATIVOS VALIDADOS DO CASO {case.case_ref}",
+            "Regra: respeite o tipo epistemológico de cada Achado. "
+            "Inferência e hipótese não devem ser apresentadas como fato.",
+        ]
+        for finding in findings:
+            marker = f"ACHADO:{finding.id}"
+            sources.append(marker)
+            lines.append(
+                f"- [{marker}] tipo={finding.finding_type}; titulo={finding.title}; "
+                f"resumo_objetivo={finding.objective_summary}; "
+                f"interpretacao={finding.interpretation or 'nenhuma'}; "
+                f"validado_por={finding.validated_by_username}"
+            )
+            if finding.excerpt and finding.excerpt.sources:
+                source_labels = "; ".join(
+                    source.source_label_snapshot for source in finding.excerpt.sources
+                )
+                lines.append(f"  fontes_do_recorte={source_labels}")
+        finding_sections.append("\n".join(lines))
+
+    if finding_sections:
+        text += "\n\n" + "\n\n".join(finding_sections)
+
+    if archive_results:
+        archive_text, archive_sources, _ = archive_context_text(archive_results)
+        if archive_text:
+            text += "\n\n" + archive_text
+            sources.extend(item for item in archive_sources if item not in sources)
 
     return InvestigativeContext(
         text=text,

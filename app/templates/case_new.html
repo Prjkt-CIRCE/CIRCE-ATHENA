@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.native-case-shell{min-height:100vh;display:grid;grid-template-columns:var(--sidebar-width) minmax(0,1fr);background:var(--bg-primary)}
+.native-case-main{grid-column:2;min-width:0}
+.native-case-header{height:72px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid var(--border-subtle);background:var(--bg-secondary)}
+.native-case-header h1{margin:0;font-size:18px;font-weight:650}.native-case-header p{margin:3px 0 0;font-size:11px;color:var(--text-tertiary)}
+.native-case-content{max-width:980px;margin:0 auto;padding:28px}
+.native-case-card{border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-secondary);overflow:hidden}
+.native-case-section{padding:22px;border-bottom:1px solid var(--border-subtle)}.native-case-section:last-child{border-bottom:0}
+.native-case-kicker{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:7px}
+.native-case-title{font-size:16px;font-weight:650;margin-bottom:5px}.native-case-help{font-size:12px;line-height:1.55;color:var(--text-tertiary)}
+.native-case-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.native-case-grid .span-2{grid-column:1/-1}
+.native-case-field label{display:block;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--text-secondary)}
+.native-case-field input,.native-case-field textarea,.native-case-field select{width:100%;border:1px solid var(--border-subtle);border-radius:8px;background:var(--bg-elevated);color:var(--text-primary);font:inherit;font-size:13px;padding:10px 11px;outline:none}
+.native-case-field textarea{min-height:88px;resize:vertical}.native-case-field input:focus,.native-case-field textarea:focus,.native-case-field select:focus{border-color:var(--accent)}
+.native-drop{position:relative;margin-top:16px;border:1px dashed var(--border-strong);border-radius:10px;padding:24px;text-align:center;background:rgba(95,179,207,.025)}
+.native-drop input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.native-drop strong{display:block;font-size:13px}.native-drop span{display:block;margin-top:6px;font-size:11px;color:var(--text-tertiary)}
+.native-file-list{margin-top:10px;font-family:var(--font-mono);font-size:9px;color:var(--text-secondary)}
+.native-case-actions{display:flex;justify-content:flex-end;gap:10px;padding:18px 22px;background:rgba(0,0,0,.08)}
+.native-error{margin-bottom:16px;padding:12px 14px;border:1px solid rgba(245,166,35,.3);border-radius:8px;background:rgba(245,166,35,.06);font-size:12px;color:#dcb16b}
+.native-note{margin-top:10px;font-size:10px;line-height:1.5;color:var(--text-tertiary)}
+@media(max-width:900px){.native-case-shell{grid-template-columns:1fr}.native-case-main{grid-column:1}.native-case-shell>.sidebar{display:none}.native-case-grid{grid-template-columns:1fr}.native-case-grid .span-2{grid-column:auto}}
+</style>
+<div class="native-case-shell">
+  {% include "partials/sidebar.html" %}
+  <main class="native-case-main">
+    <header class="native-case-header">
+      <a href="/platea" class="btn-text">← Gestor de Investigações</a>
+      <div>
+        <h1>Novo caso</h1>
+        <p>O ATHENA cria a identidade interna; números oficiais podem ser informados depois.</p>
+      </div>
+    </header>
+
+    <div class="native-case-content">
+      {% if error %}<div class="native-error">{{ error }}</div>{% endif %}
+      <form class="native-case-card" method="post" action="/cases" enctype="multipart/form-data">
+        <section class="native-case-section">
+          <div class="native-case-kicker">Identificação mínima</div>
+          <div class="native-case-title">Dê um nome de trabalho ao caso</div>
+          <div class="native-case-help">Não é necessário conhecer todos os números do procedimento agora. O identificador técnico será gerado automaticamente.</div>
+          <div class="native-case-grid">
+            <div class="native-case-field span-2">
+              <label for="title">Título provisório *</label>
+              <input id="title" name="title" required minlength="3" maxlength="256" value="{{ values.title or '' }}" placeholder="Ex.: Análise celular — latrocínio Bairro X">
+            </div>
+            <div class="native-case-field">
+              <label for="classification">Natureza / classificação</label>
+              <input id="classification" name="classification" maxlength="64" value="{{ values.classification or '' }}" placeholder="Ex.: Latrocínio">
+            </div>
+            <div class="native-case-field">
+              <label for="source_unit">Unidade / seção</label>
+              <input id="source_unit" name="source_unit" maxlength="128" value="{{ values.source_unit or '' }}" placeholder="Ex.: Núcleo de Inteligência">
+            </div>
+            <div class="native-case-field span-2">
+              <label for="notes">Observação inicial</label>
+              <textarea id="notes" name="notes" placeholder="Opcional. Não substitui os documentos originais do caso.">{{ values.notes or '' }}</textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="native-case-section">
+          <div class="native-case-kicker">Materiais iniciais · opcional</div>
+          <div class="native-case-title">Alimente a Entrada do Pool</div>
+          <div class="native-case-help">OS, BO, laudos, fichas, fotos e outros arquivos podem entrar agora. O original será preservado com hash e ficará na Bin Entrada até a classificação.</div>
+          <div class="native-drop">
+            <input id="native-files" type="file" name="files" multiple>
+            <strong>Arraste arquivos aqui ou clique para selecionar</strong>
+            <span>Até 50 arquivos por envio · 250 MB por arquivo nesta etapa</span>
+          </div>
+          <div class="native-file-list" id="native-file-list">Nenhum arquivo selecionado.</div>
+        </section>
+
+        <section class="native-case-section">
+          <div class="native-case-kicker">Roteiro inicial</div>
+          <div class="native-case-title">Como você quer começar?</div>
+          <div class="native-case-field" style="margin-top:14px">
+            <label for="product_template">Produto / roteiro</label>
+            <select id="product_template" name="product_template">
+              <option value="mobile_analysis" {% if (values.product_template or 'mobile_analysis') == 'mobile_analysis' %}selected{% endif %}>Relatório Técnico — Análise de Dispositivo Móvel</option>
+              <option value="none" {% if values.product_template == 'none' %}selected{% endif %}>Criar caso sem roteiro por enquanto</option>
+            </select>
+          </div>
+          <div class="native-note">O número oficial do relatório permanece pendente até o numerador institucional. Presets de cabeçalho serão configurados em etapa própria.</div>
+        </section>
+
+        <div class="native-case-actions">
+          <a href="/platea" class="btn-secondary">Cancelar</a>
+          <button type="submit" class="btn-primary">Criar e abrir Workspace</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+<script>
+const nativeFiles=document.getElementById('native-files');
+const nativeFileList=document.getElementById('native-file-list');
+nativeFiles?.addEventListener('change',()=>{
+  const files=Array.from(nativeFiles.files||[]);
+  nativeFileList.textContent=files.length?`${files.length} arquivo(s): `+files.slice(0,6).map(item=>item.name).join(' · ')+(files.length>6?' · …':''):'Nenhum arquivo selecionado.';
+});
+</script>
+{% endblock %}

@@ -16,6 +16,7 @@ import app.models.operator   # noqa: F401
 import app.models.photo      # noqa: F401
 import app.models.platea     # noqa: F401
 import app.models.workspace  # noqa: F401
+import app.models.reporting  # noqa: F401
 
 config = context.config
 

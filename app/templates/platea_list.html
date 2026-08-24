@@ -182,6 +182,7 @@
       <span class="page-header__title">Gestor de Investigações</span>
       <span class="page-header__subtitle">{{ total }} caso(s) disponível(is)</span>
       <div class="page-header__spacer"></div>
+      <a href="/cases/new" class="btn-primary" style="text-decoration:none;margin-right:14px">+ Novo caso</a>
       <div class="page-header__user">
         <div class="page-header__avatar">{{ (operator.full_name or "?")[:2].upper() }}</div>
         <div>
@@ -215,7 +216,7 @@
               <th>Unidade de origem</th>
               <th>Publicado por</th>
               <th>Publicado em</th>
-              <th>Versao</th>
+              <th>Origem</th>
             </tr>
           </thead>
           <tbody>
@@ -244,7 +245,7 @@
               <td class="text-secondary">{{ c.source_unit or "—" }}</td>
               <td class="mono-cell">{{ c.published_by }}</td>
               <td class="mono-cell">{{ c.published_at.strftime("%d/%m/%Y %H:%M") }}</td>
-              <td class="mono-cell" style="color:var(--text-tertiary)">v{{ c.published_version }}</td>
+              <td>{% if c.origin_type == "native" %}<span class="badge badge--success">ATHENA</span>{% else %}<span class="badge badge--muted">EXTERNA</span>{% endif %}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -268,9 +269,8 @@
       {% else %}
       <div class="card" style="padding:48px;text-align:center">
         <div style="color:var(--text-tertiary);font-size:13px">Nenhum caso disponível no Gestor de Investigações.</div>
-        <div style="color:var(--text-tertiary);font-size:12px;margin-top:8px">
-          Casos aparecerão aqui conforme as fontes e os fluxos de integração habilitados para o núcleo.
-        </div>
+        <div style="color:var(--text-tertiary);font-size:12px;margin-top:8px">Crie o primeiro caso diretamente no ATHENA ou receba casos por integrações habilitadas.</div>
+        <a href="/cases/new" class="btn-primary" style="display:inline-flex;margin-top:18px;text-decoration:none">+ Novo caso</a>
       </div>
       {% endif %}
 
