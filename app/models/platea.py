@@ -56,12 +56,31 @@ class SharedDocument(Base):
 
     id:             Mapped[int]           = mapped_column(Integer, primary_key=True, autoincrement=True)
     shared_case_id: Mapped[int]           = mapped_column(Integer, ForeignKey("shared_cases.id", ondelete="CASCADE"), nullable=False)
-    document_ref:   Mapped[Optional[str]] = mapped_column(String(64),  nullable=True)
-    filename:       Mapped[str]           = mapped_column(String(256), nullable=False)
-    file_type:      Mapped[Optional[str]] = mapped_column(String(32),  nullable=True)
-    sha256:         Mapped[Optional[str]] = mapped_column(String(64),  nullable=True)
-    description:    Mapped[Optional[str]] = mapped_column(Text,        nullable=True)
-    imported_at:    Mapped[Optional[str]] = mapped_column(String(32),  nullable=True)
+    document_ref:   Mapped[Optional[str]] = mapped_column(String(64),   nullable=True)
+    filename:       Mapped[str]           = mapped_column(String(256),  nullable=False)
+    file_type:      Mapped[Optional[str]] = mapped_column(String(32),   nullable=True)
+    sha256:         Mapped[Optional[str]] = mapped_column(String(64),   nullable=True)
+    description:    Mapped[Optional[str]] = mapped_column(Text,         nullable=True)
+    imported_at:    Mapped[Optional[str]] = mapped_column(String(32),   nullable=True)
+
+    # AT-06B-CURATED-01 ? physical original contract.
+    # Nullable by design: historical documents remain valid metadata-only rows.
+    storage_relpath: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    mime_type:       Mapped[Optional[str]] = mapped_column(String(128),  nullable=True)
+    size_bytes:      Mapped[Optional[int]] = mapped_column(Integer,      nullable=True)
+    storage_origin:  Mapped[Optional[str]] = mapped_column(String(64),   nullable=True)
+    stored_at:       Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    @property
+    def storage_state(self) -> str:
+        return "physical_available" if self.storage_relpath else "metadata_only"
+
+    @property
+    def physical_available(self) -> bool:
+        return bool(self.storage_relpath)
 
     case: Mapped["SharedCase"] = relationship(back_populates="documents")
 
