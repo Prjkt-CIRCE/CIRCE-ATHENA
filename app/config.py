@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8766
     data_dir: str = "./data"
+    case_storage_dir: str = "case_storage"
+    document_intake_max_bytes: int = 100 * 1024 * 1024
     secret_key: str = "athena-dev-secret-troque-antes-de-producao"
     session_hours: int = 8
     inactivity_lock_minutes: int = 10
