@@ -8,6 +8,7 @@ from app.database import SessionLocal
 from app.models.platea import SharedCase
 from app.models.workspace import InvestigativeBlock, InvestigativeWorkspace
 from app.services.audit_service import log_action
+from app.services.case_material_service import load_case_materials
 from app.services.workspace_service import (
     create_block,
     discard_block,
@@ -67,10 +68,11 @@ async def workspace_detail(request: Request, case_ref: str, block: int | None = 
     operator = request.session.get("operator", {})
     db = SessionLocal()
     try:
-        case = db.query(SharedCase).filter(SharedCase.case_ref == case_ref).first()
-        if not case:
+        materials = load_case_materials(db, case_ref=case_ref)
+        if not materials:
             return RedirectResponse(url="/platea", status_code=302)
 
+        case = materials.case
         workspace = (
             db.query(InvestigativeWorkspace)
             .filter(InvestigativeWorkspace.shared_case_id == case.id)
@@ -82,10 +84,10 @@ async def workspace_detail(request: Request, case_ref: str, block: int | None = 
                 status_code=302,
             )
 
-        persons = list(case.persons)
-        documents = list(case.documents)
-        links = list(case.links)
-        annotations = list(case.annotations)
+        persons = list(materials.persons)
+        documents = list(materials.documents)
+        links = list(materials.links)
+        annotations = list(materials.annotations)
         blocks = list_blocks(db, workspace.id)
         active_block = next((item for item in blocks if item.id == block), None)
 
