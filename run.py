@@ -14,6 +14,7 @@ from app.routes.photos import router as photos_router
 from app.routes.sync import router as sync_router
 from app.routes.platea import router as platea_router
 from app.routes.workspace import router as workspace_router
+from app.routes.documents import router as documents_router
 
 # Evolução de schema é responsabilidade do Alembic.
 # Antes de iniciar uma versão nova da aplicação, execute: alembic upgrade head
@@ -27,6 +28,7 @@ app.include_router(photos_router)
 app.include_router(sync_router)
 app.include_router(platea_router)
 app.include_router(workspace_router)
+app.include_router(documents_router)
 
 if __name__ == "__main__":
     print("=" * 52)
