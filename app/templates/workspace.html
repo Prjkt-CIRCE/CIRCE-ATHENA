@@ -147,6 +147,88 @@ body.workspace-resizing *{
   .pane-collapse-btn,.workspace-header__layout{display:none}
 }
 
+
+/* AT06B_CURATED_01_DOCUMENT_INTAKE_UI */
+.document-section__head{align-items:center}
+.document-section__tools{display:flex;align-items:center;gap:7px}
+
+.document-intake-trigger{
+  min-height:25px;
+  padding:0 8px;
+  border:1px solid rgba(95,179,207,.34);
+  border-radius:6px;
+  background:rgba(95,179,207,.06);
+  color:var(--accent);
+  font-family:var(--font-mono);
+  font-size:8px;
+  font-weight:600;
+  letter-spacing:.04em;
+  cursor:pointer;
+}
+.document-intake-trigger:hover:not(:disabled){
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  color:var(--accent-strong);
+}
+.document-intake-trigger:disabled{opacity:.48;cursor:wait}
+
+.document-intake-feedback{
+  margin:7px 8px 4px;
+  padding:7px 8px;
+  border:1px solid var(--border-subtle);
+  border-radius:7px;
+  background:var(--bg-elevated);
+  color:var(--text-secondary);
+  font-size:10px;
+  line-height:1.4;
+}
+.document-intake-feedback.is-working{border-color:rgba(95,179,207,.28);color:var(--accent)}
+.document-intake-feedback.is-success{border-color:rgba(124,184,124,.28);color:var(--success)}
+.document-intake-feedback.is-warning{border-color:rgba(217,178,90,.30);color:var(--warning)}
+.document-intake-feedback.is-error{border-color:rgba(210,119,115,.30);color:var(--error)}
+
+.document-context-item{
+  position:relative;
+  align-items:center;
+  padding-right:58px;
+}
+.document-context-item__body{min-width:0;flex:1}
+.document-context-item__name{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.document-state{
+  display:inline-block;
+  margin-top:5px;
+  font-family:var(--font-mono);
+  font-size:7px;
+  font-weight:600;
+  letter-spacing:.07em;
+}
+.document-state--available{color:var(--success)}
+.document-state--metadata{color:var(--text-tertiary)}
+
+.document-original-link{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  padding:4px 5px;
+  border:1px solid var(--border-subtle);
+  border-radius:5px;
+  color:var(--text-tertiary);
+  font-family:var(--font-mono);
+  font-size:8px;
+  text-decoration:none;
+}
+.document-original-link:hover{
+  border-color:var(--border-strong);
+  background:var(--bg-hover);
+  color:var(--text-primary);
+}
+
 </style>
 
 {% include "partials/sidebar.html" %}
@@ -181,14 +263,75 @@ body.workspace-resizing *{
         {% else %}<div class="empty-list">Nenhuma pessoa.</div>{% endfor %}
       </div>
 
-      <div class="context-section">
-        <div class="context-section__title"><span>Documentos</span><span>{{ documents|length }}</span></div>
-        {% for item in documents %}
-        <label class="context-item">
-          <input form="create-block-form" type="checkbox" name="sources" value="document:{{ item.id }}">
-          <span><span>{{ item.filename }}</span><div class="context-item__meta">{{ item.document_ref or (item.sha256[:16] ~ '…' if item.sha256 else 'sem hash') }}</div></span>
-        </label>
-        {% else %}<div class="empty-list">Nenhum documento.</div>{% endfor %}
+      <div class="context-section context-section--documents" id="case-documents-section">
+        <div class="context-section__title document-section__head">
+          <span>Documentos</span>
+          <div class="document-section__tools">
+            <span>{{ documents|length }}</span>
+            <button
+              class="document-intake-trigger"
+              id="document-intake-trigger"
+              type="button"
+              title="Incorporar um arquivo original ao Caso"
+            >INCORPORAR MATERIAL</button>
+            <input
+              id="document-intake-input"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.docx,.xlsx"
+              hidden
+            >
+          </div>
+        </div>
+
+        <div
+          class="document-intake-feedback"
+          id="document-intake-feedback"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+
+        <div id="case-document-list">
+          {% for item in documents %}
+          <div
+            class="context-item document-context-item"
+            data-document-id="{{ item.id }}"
+            data-storage-state="{{ item.storage_state }}"
+          >
+            <input
+              form="create-block-form"
+              type="checkbox"
+              name="sources"
+              value="document:{{ item.id }}"
+              aria-label="Selecionar documento {{ item.filename }}"
+            >
+
+            <span class="document-context-item__body">
+              <span class="document-context-item__name">{{ item.filename }}</span>
+
+              <div class="context-item__meta">
+                {{ item.document_ref or (item.sha256[:16] ~ '?' if item.sha256 else 'sem hash') }}
+              </div>
+
+              {% if item.physical_available %}
+              <span class="document-state document-state--available">DISPON?VEL</span>
+              {% else %}
+              <span class="document-state document-state--metadata">METADADOS</span>
+              {% endif %}
+            </span>
+
+            {% if item.physical_available %}
+            <a
+              class="document-original-link"
+              href="/api/documents/{{ item.id }}/original"
+              title="Recuperar o original f?sico"
+            >Original</a>
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="empty-list">Nenhum documento.</div>
+          {% endfor %}
+        </div>
       </div>
 
       <div class="context-section">
@@ -309,6 +452,120 @@ const send=document.getElementById('athena-send');
 const stream=document.getElementById('athena-stream');
 const empty=document.getElementById('athena-empty');
 const modeBtn=document.getElementById('workspace-mode');
+
+// AT06B_CURATED_01_DOCUMENT_INTAKE_UI
+const documentIntakeTrigger=document.getElementById('document-intake-trigger');
+const documentIntakeInput=document.getElementById('document-intake-input');
+const documentIntakeFeedback=document.getElementById('document-intake-feedback');
+const intakeFeedbackKey='circe-athena.document-intake.'+caseRef;
+
+function setDocumentIntakeFeedback(message,kind){
+  if(!documentIntakeFeedback)return;
+  documentIntakeFeedback.hidden=false;
+  documentIntakeFeedback.textContent=message;
+  documentIntakeFeedback.className='document-intake-feedback';
+  if(kind)documentIntakeFeedback.classList.add('is-'+kind);
+}
+
+function restoreDocumentIntakeFeedback(){
+  try{
+    const raw=sessionStorage.getItem(intakeFeedbackKey);
+    if(!raw)return;
+    sessionStorage.removeItem(intakeFeedbackKey);
+    const saved=JSON.parse(raw);
+    if(saved&&saved.message){
+      setDocumentIntakeFeedback(saved.message,saved.kind||'success');
+    }
+  }catch(_){}
+}
+
+documentIntakeTrigger?.addEventListener('click',()=>{
+  if(documentIntakeTrigger.disabled)return;
+  documentIntakeInput?.click();
+});
+
+documentIntakeInput?.addEventListener('change',async()=>{
+  const file=documentIntakeInput.files?.[0];
+  if(!file)return;
+
+  const originalText=documentIntakeTrigger?.textContent||'INCORPORAR MATERIAL';
+
+  if(documentIntakeTrigger){
+    documentIntakeTrigger.disabled=true;
+    documentIntakeTrigger.textContent='INCORPORANDO?';
+  }
+
+  setDocumentIntakeFeedback(
+    'Incorporando '+file.name+' ao Caso?',
+    'working'
+  );
+
+  const formData=new FormData();
+  formData.append('file',file);
+
+  try{
+    const response=await fetch(
+      '/api/cases/'+encodeURIComponent(caseRef)+'/documents/intake',
+      {
+        method:'POST',
+        body:formData,
+        headers:{'Accept':'application/json'}
+      }
+    );
+
+    let payload=null;
+    try{payload=await response.json()}catch(_){}
+
+    if(!response.ok){
+      throw new Error(
+        payload?.error||
+        ('Falha ao incorporar o material (HTTP '+response.status+').')
+      );
+    }
+
+    let message='Material incorporado ao Caso.';
+    let kind='success';
+
+    if(payload?.status==='duplicate'){
+      message='Documento j? existe neste Caso. Nenhuma nova c?pia foi criada.';
+      kind='warning';
+    }else if(payload?.status==='hydrated'){
+      message='Original f?sico vinculado ao documento existente.';
+    }else if(payload?.document?.filename){
+      message='Material incorporado: '+payload.document.filename+'.';
+    }
+
+    setDocumentIntakeFeedback(message,kind);
+
+    try{
+      sessionStorage.setItem(
+        intakeFeedbackKey,
+        JSON.stringify({message,kind})
+      );
+    }catch(_){}
+
+    window.setTimeout(
+      ()=>window.location.reload(),
+      450
+    );
+
+  }catch(error){
+    setDocumentIntakeFeedback(
+      error?.message||'N?o foi poss?vel incorporar o material.',
+      'error'
+    );
+
+    if(documentIntakeTrigger){
+      documentIntakeTrigger.disabled=false;
+      documentIntakeTrigger.textContent=originalText;
+    }
+
+    documentIntakeInput.value='';
+  }
+});
+
+restoreDocumentIntakeFeedback();
+
 
 // AT06A_RESIZABLE_TILING_V1
 const workspaceGrid=document.getElementById('workspace-grid');
