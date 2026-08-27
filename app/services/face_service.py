@@ -23,24 +23,48 @@ def _register_nvidia_dlls() -> None:
 
 _register_nvidia_dlls()
 
-from insightface.app import FaceAnalysis  # noqa: E402 — import apos registro de DLLs
+# INSIGHTFACE_LAZY_IMPORT_V1
+# InsightFace/ONNX Runtime ? carregado somente quando reconhecimento facial for realmente solicitado.
 
-_app: FaceAnalysis | None = None
+_app = None
 
 
-def _get_app() -> FaceAnalysis:
+def _get_app():
     """Retorna instancia singleton do FaceAnalysis (lazy init)."""
     global _app
+
     if _app is None:
-        logger.info("Inicializando InsightFace (buffalo_l, CUDA+CPU)...")
+        try:
+            from insightface.app import FaceAnalysis
+        except Exception as exc:
+            logger.exception(
+                "InsightFace/ONNX Runtime indisponivel."
+            )
+            raise RuntimeError(
+                "Reconhecimento facial indisponivel: "
+                "falha ao carregar InsightFace/ONNX Runtime."
+            ) from exc
+
+        logger.info(
+            "Inicializando InsightFace (buffalo_l, CUDA+CPU)..."
+        )
+
         _app = FaceAnalysis(
             name="buffalo_l",
-            providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
+            providers=[
+                "CUDAExecutionProvider",
+                "CPUExecutionProvider",
+            ],
         )
-        _app.prepare(ctx_id=0, det_size=(640, 640))
-        logger.info("InsightFace inicializado.")
-    return _app
 
+        _app.prepare(
+            ctx_id=0,
+            det_size=(640, 640),
+        )
+
+        logger.info("InsightFace inicializado.")
+
+    return _app
 
 def extract_embedding(image_path: str) -> tuple[np.ndarray | None, str]:
     """
