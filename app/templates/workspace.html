@@ -95,58 +95,191 @@ body.workspace-resizing *{
 }
 
 
-/* AT06A_COLLAPSIBLE_PANES_V1 */
-.workspace-pane__head{position:sticky}
+/* UX01_PANELS_FINAL_V1 ----------------------------------------- */
+
+.workspace-pane__head{
+  position:sticky;
+}
+
 .pane-collapse-btn{
-  position:absolute;right:10px;top:50%;transform:translateY(-50%);
-  width:25px;height:25px;border:1px solid var(--border-subtle);
-  border-radius:7px;background:transparent;color:var(--text-tertiary);
-  font-size:17px;line-height:1;cursor:pointer;padding:0;
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:25px;
+  height:25px;
+  padding:0;
+  border:1px solid var(--border-subtle);
+  border-radius:3px;
+  background:transparent;
+  color:var(--text-tertiary);
+  font-size:17px;
+  line-height:1;
+  cursor:pointer;
 }
-.pane-collapse-btn:hover{color:var(--accent);border-color:var(--border-strong);background:var(--bg-hover)}
-.workspace-header__layout{
-  margin-right:8px;height:29px;padding:0 9px;border:1px solid var(--border-subtle);
-  border-radius:7px;background:transparent;color:var(--text-tertiary);
-  font-family:var(--font-mono);font-size:8px;letter-spacing:.04em;cursor:pointer;
-}
-.workspace-header__layout:hover{color:var(--text-primary);border-color:var(--border-strong);background:var(--bg-hover)}
 
+.pane-collapse-btn:hover{
+  color:var(--accent);
+  border-color:var(--border-strong);
+  background:var(--bg-hover);
+}
+
+/* POOL recolhido */
 .workspace-grid.context-collapsed{
-  grid-template-columns:46px 7px minmax(360px,1fr) 7px var(--athena-width);
-}
-.workspace-grid.work-collapsed{
-  grid-template-columns:var(--context-width) 7px 46px 7px minmax(360px,1fr);
-}
-.workspace-grid.context-collapsed.work-collapsed{
-  grid-template-columns:46px 7px 46px 7px minmax(360px,1fr);
-}
-.workspace-grid.context-collapsed #splitter-context,
-.workspace-grid.work-collapsed #splitter-athena{
-  pointer-events:none;opacity:.25;
+  grid-template-columns:
+    46px
+    7px
+    minmax(420px,1fr)
+    7px
+    var(--athena-width);
 }
 
-.workspace-pane.is-collapsed{overflow:hidden}
-.workspace-pane.is-collapsed > :not(.workspace-pane__head){display:none!important}
-.workspace-pane.is-collapsed .workspace-pane__head{
-  position:relative;top:auto;height:100%;min-height:100%;
-  padding:10px 5px;display:flex;flex-direction:column;align-items:center;gap:10px;
+/* COLUNA DIREITA recolhida */
+.workspace-grid.right-collapsed{
+  grid-template-columns:
+    var(--context-width)
+    7px
+    minmax(420px,1fr)
+    7px
+    46px;
+}
+
+/* Ambos auxiliares recolhidos */
+.workspace-grid.context-collapsed.right-collapsed{
+  grid-template-columns:
+    46px
+    7px
+    minmax(420px,1fr)
+    7px
+    46px;
+}
+
+.workspace-grid.context-collapsed #splitter-context,
+.workspace-grid.right-collapsed #splitter-athena{
+  pointer-events:none;
+  opacity:.25;
+}
+
+/* Pool fechado */
+.workspace-pane--context.is-collapsed{
+  overflow:hidden;
+}
+
+.workspace-pane--context.is-collapsed > :not(.workspace-pane__head){
+  display:none!important;
+}
+
+.workspace-pane--context.is-collapsed .workspace-pane__head{
+  position:relative;
+  top:auto;
+  height:100%;
+  min-height:100%;
+  padding:10px 5px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
   border-bottom:0;
 }
-.workspace-pane.is-collapsed .workspace-pane__eyebrow{
-  writing-mode:vertical-rl;transform:rotate(180deg);
-  font-size:8px;letter-spacing:.12em;margin-top:30px;
-}
-.workspace-pane.is-collapsed .workspace-pane__title{
-  writing-mode:vertical-rl;transform:rotate(180deg);
-  margin:0;font-size:10px;line-height:1.1;flex:1;color:var(--text-secondary);
-}
-.workspace-pane.is-collapsed .pane-collapse-btn{
-  position:absolute;top:8px;left:50%;right:auto;transform:translateX(-50%);
-}
-@media(max-width:900px){
-  .pane-collapse-btn,.workspace-header__layout{display:none}
+
+.workspace-pane--context.is-collapsed .workspace-pane__eyebrow,
+.workspace-pane--context.is-collapsed .workspace-pane__title{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
 }
 
+.workspace-pane--context.is-collapsed .workspace-pane__eyebrow{
+  margin-top:30px;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+
+.workspace-pane--context.is-collapsed .workspace-pane__title{
+  margin:0;
+  flex:1;
+  font-size:10px;
+  line-height:1.1;
+  color:var(--text-secondary);
+}
+
+.workspace-pane--context.is-collapsed .pane-collapse-btn{
+  top:8px;
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+}
+
+/* Inspector + Composer fechados */
+.workspace-right.is-collapsed{
+  display:block;
+  overflow:hidden;
+}
+
+.workspace-right.is-collapsed > .athena-pane{
+  display:none!important;
+}
+
+.workspace-right.is-collapsed .workspace-inspector{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:100%;
+  border-bottom:0;
+  overflow:hidden;
+}
+
+.workspace-right.is-collapsed .workspace-inspector__body{
+  display:none!important;
+}
+
+.workspace-right.is-collapsed .workspace-inspector__head{
+  position:relative;
+  top:auto;
+  width:100%;
+  height:100%;
+  min-height:100%;
+  padding:10px 5px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  border-bottom:0;
+}
+
+.workspace-right.is-collapsed .workspace-pane__eyebrow,
+.workspace-right.is-collapsed .workspace-pane__title{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+}
+
+.workspace-right.is-collapsed .workspace-pane__eyebrow{
+  margin-top:30px;
+  font-size:8px;
+  letter-spacing:.12em;
+}
+
+.workspace-right.is-collapsed .workspace-pane__title{
+  margin:0;
+  flex:1;
+  overflow:hidden;
+  font-size:10px;
+  line-height:1.1;
+  color:var(--text-secondary);
+}
+
+.workspace-right.is-collapsed .pane-collapse-btn{
+  top:8px;
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+}
+
+@media(max-width:900px){
+  .pane-collapse-btn,
+  .workspace-header__layout{
+    display:none;
+  }
+}
 
 /* AT06B_CURATED_01_DOCUMENT_INTAKE_UI */
 .document-section__head{align-items:center}
@@ -229,27 +362,452 @@ body.workspace-resizing *{
   color:var(--text-primary);
 }
 
+
+/* UX01_SHELL_V1 -------------------------------------------------- */
+
+.workspace-page{
+  --accent:#E8B559;
+  --accent-soft:rgba(232,181,89,.10);
+  --accent-strong:#F0C56D;
+}
+
+.workspace-grid{
+  --athena-width:520px;
+}
+
+/* POOL */
+.workspace-pane--context{
+  background:#191A1D;
+}
+
+/* MESA */
+.workspace-pane--work{
+  background:var(--bg-base);
+}
+
+/* COLUNA DIREITA */
+.workspace-right{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:minmax(260px,1fr) minmax(220px,.62fr);
+  overflow:hidden;
+  background:#18191C;
+}
+
+.workspace-inspector{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  overflow:hidden;
+  border-bottom:1px solid var(--border-subtle);
+}
+
+.workspace-inspector__body{
+  min-height:0;
+  overflow:auto;
+  padding:18px;
+  background:#18191C;
+}
+
+.workspace-document-sheet{
+  width:min(100%,760px);
+  min-height:100%;
+  margin:0 auto;
+  padding:28px 30px 36px;
+  border:1px solid #C9C5B5;
+  border-radius:4px;
+  background:#F5F2E9;
+  color:#1F1E18;
+}
+
+.workspace-document-sheet__kicker,
+.workspace-document-sheet__meta{
+  font-family:var(--font-mono);
+  text-transform:uppercase;
+  letter-spacing:.09em;
+}
+
+.workspace-document-sheet__kicker{
+  margin-bottom:24px;
+  padding-bottom:10px;
+  border-bottom:1px solid #C9C5B5;
+  font-size:8px;
+  color:#84827A;
+}
+
+.workspace-document-sheet__meta{
+  margin:22px 0 8px;
+  font-size:8px;
+  color:#84827A;
+}
+
+.workspace-document-sheet h2{
+  margin:0;
+  font-size:19px;
+  line-height:1.25;
+  font-weight:600;
+  color:#1F1E18;
+}
+
+.workspace-document-sheet h3{
+  margin:0 0 10px;
+  font-size:15px;
+  line-height:1.3;
+  font-weight:600;
+  color:#1F1E18;
+}
+
+.workspace-document-sheet p{
+  margin:0;
+  font-size:13px;
+  line-height:1.6;
+  color:#52514A;
+}
+
+.workspace-document-sheet__muted{
+  color:#84827A!important;
+}
+
+.workspace-right .athena-pane{
+  min-width:0;
+  min-height:0;
+  width:100%;
+  border-left:0;
+  background:var(--bg-base);
+}
+
+.workspace-right .athena-stream{
+  padding:12px 14px;
+}
+
+.workspace-right .athena-compose{
+  padding:10px 12px;
+}
+
+/* Accent amber somente dentro do Workspace */
+.workspace-page .workspace-splitter:hover,
+.workspace-page .workspace-splitter.is-dragging{
+  background:rgba(232,181,89,.08);
+  border-left-color:rgba(232,181,89,.42);
+  border-right-color:rgba(232,181,89,.18);
+}
+
+.workspace-page .document-intake-trigger{
+  border-color:rgba(232,181,89,.34);
+  background:rgba(232,181,89,.06);
+}
+
+.workspace-page .document-intake-feedback.is-working{
+  border-color:rgba(232,181,89,.28);
+}
+
+/* Desktop reduzido */
+@media(max-width:1100px){
+  .workspace-right{
+    grid-template-rows:minmax(240px,1fr) minmax(210px,.68fr);
+  }
+
+  .workspace-inspector__body{
+    padding:12px;
+  }
+
+  .workspace-document-sheet{
+    padding:22px 22px 30px;
+  }
+}
+
+/* Fallback seguro abaixo do desktop alvo */
+@media(max-width:900px){
+  .workspace-right{
+    min-height:720px;
+    grid-template-rows:minmax(340px,1fr) minmax(300px,.85fr);
+    border-top:1px solid var(--border-subtle);
+  }
+}
+
+
+/* UX01_SHELL_REFINEMENT_V2 ------------------------------------- */
+
+.workspace-page{
+  margin-left:0!important;
+  --header-height:52px;
+}
+
+.workspace-commandbar{
+  min-width:0;
+  height:52px;
+  padding:0;
+  gap:0;
+  background:#121316;
+  border-bottom:1px solid var(--border-strong);
+}
+
+.workspace-brand{
+  width:190px;
+  height:100%;
+  flex:0 0 190px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:0 14px;
+  border-right:1px solid var(--border-subtle);
+  color:var(--text-primary);
+}
+
+.workspace-brand:hover{
+  background:var(--bg-hover);
+}
+
+.workspace-brand__back{
+  color:var(--accent);
+  font-family:var(--font-mono);
+  font-size:13px;
+}
+
+.workspace-brand__name{
+  font-family:var(--font-mono);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.08em;
+}
+
+.workspace-header__cell{
+  height:100%;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:5px 14px;
+  border-right:1px solid var(--border-subtle);
+}
+
+.workspace-header__cell--case{
+  width:245px;
+}
+
+.workspace-header__cell--operator{
+  width:170px;
+  border-left:1px solid var(--border-subtle);
+}
+
+.workspace-header__cell strong{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+  line-height:1.25;
+  font-weight:500;
+  color:var(--text-primary);
+}
+
+.workspace-header__label{
+  margin-bottom:3px;
+  font-family:var(--font-mono);
+  font-size:7px;
+  line-height:1;
+  letter-spacing:.11em;
+  color:var(--text-tertiary);
+}
+
+.workspace-header__mono{
+  font-family:var(--font-mono);
+  font-size:9px!important;
+}
+
+.workspace-header__status{
+  font-family:var(--font-mono);
+  color:var(--accent)!important;
+  text-transform:uppercase;
+}
+
+.workspace-header__layout,
+.workspace-header__mode{
+  margin:0 6px 0 0;
+  height:28px;
+  align-self:center;
+  border-radius:3px;
+  font-family:var(--font-mono);
+  font-size:8px;
+  letter-spacing:.05em;
+}
+
+.workspace-pane__head{
+  min-height:48px;
+  padding:9px 12px 8px;
+}
+
+.workspace-pane__eyebrow{
+  font-size:8px;
+  letter-spacing:.12em;
+}
+
+.workspace-pane__title{
+  margin-top:3px;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* Inspector dominante, Composer compacto */
+.workspace-right{
+  grid-template-rows:minmax(300px,1.7fr) minmax(210px,1fr);
+}
+
+/* Eliminar linguagem visual legacy incompat?vel */
+.context-selection-bar{
+  background:var(--bg-base)!important;
+  backdrop-filter:none!important;
+}
+
+.workspace-page .context-item{
+  border-radius:2px;
+}
+
+.workspace-page .block-form,
+.workspace-page .block-card{
+  border-radius:4px;
+}
+
+.workspace-page .block-form input,
+.workspace-page .block-form textarea,
+.workspace-page .athena-compose textarea,
+.workspace-page .block-form button,
+.workspace-page .athena-send,
+.workspace-page .pane-collapse-btn,
+.workspace-page .document-intake-trigger,
+.workspace-page .document-intake-feedback,
+.workspace-page .document-original-link,
+.workspace-page .source-pill,
+.workspace-page .source-pill__remove button,
+.workspace-page .context-selection-bar button,
+.workspace-page .block-undo-button{
+  border-radius:3px;
+}
+
+.workspace-page .chat-msg--user .chat-msg__body{
+  border-radius:3px;
+}
+
+/* Mesa menos cardificada */
+.workspace-page .block-form{
+  background:transparent;
+  padding:12px;
+}
+
+.workspace-inspector__body{
+  padding:14px;
+}
+
+.workspace-document-sheet{
+  padding:24px 26px 30px;
+}
+
+@media(max-width:900px){
+  .workspace-page{
+    margin-left:0!important;
+  }
+}
+
+
+/* UX01_LAYOUT_BUTTON_POLISH_V1 ---------------------------------- */
+
+.workspace-header__layout{
+  height:28px;
+  margin:0 6px 0 0;
+  padding:0 9px;
+  align-self:center;
+
+  border:1px solid var(--border-subtle);
+  border-radius:3px;
+
+  background:transparent;
+  color:var(--text-tertiary);
+
+  font-family:var(--font-mono);
+  font-size:8px;
+  font-weight:500;
+  letter-spacing:.06em;
+
+  cursor:pointer;
+
+  transition:
+    color .12s ease,
+    border-color .12s ease,
+    background .12s ease;
+}
+
+.workspace-header__layout:hover{
+  color:var(--accent);
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+
+.workspace-header__layout:focus-visible{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px var(--accent);
+}
+
 </style>
 
-{% include "partials/sidebar.html" %}
 <section class="workspace-page">
-  <header class="workspace-header">
-    <a class="workspace-header__back" href="/platea/{{ case.case_ref }}">&larr; Gestor de Investiga&ccedil;&otilde;es</a>
-    <div>
-      <div class="workspace-header__title">{{ case.title }}</div>
-      <div class="workspace-header__case">{{ case.case_ref }} · WORKSPACE {{ workspace.id }}</div>
+  <header class="workspace-header workspace-commandbar">
+    <a
+      class="workspace-brand"
+      href="/platea/{{ case.case_ref }}"
+      title="Voltar ao Gestor de Investiga??es"
+    >
+      <span class="workspace-brand__back">&larr;</span>
+      <span class="workspace-brand__name">CIRCE-ATHENA</span>
+    </a>
+
+    <div class="workspace-header__cell workspace-header__cell--case">
+      <span class="workspace-header__label">CASO</span>
+      <strong>{{ case.title }}</strong>
     </div>
+
+    <div class="workspace-header__cell">
+      <span class="workspace-header__label">C&Oacute;DIGO</span>
+      <strong class="workspace-header__mono">{{ case.case_ref }}</strong>
+    </div>
+
+    <div class="workspace-header__cell">
+      <span class="workspace-header__label">STATUS</span>
+      <strong class="workspace-header__status">{{ case.status }}</strong>
+    </div>
+
     <div class="workspace-header__spacer"></div>
-    <button class="workspace-header__layout" id="reset-workspace-layout" type="button" title="Restaurar larguras e painéis">Restaurar layout</button>
-    <button class="workspace-header__mode" id="workspace-mode" type="button" data-mode="safe">SAFE</button>
+
+    <div class="workspace-header__cell workspace-header__cell--operator">
+      <span class="workspace-header__label">USU&Aacute;RIO</span>
+      <strong>
+        {{ operator.get('display_name') or operator.get('username') or 'operador' }}
+      </strong>
+    </div>
+
+    <button
+      class="workspace-header__layout"
+      id="reset-workspace-layout"
+      type="button"
+      title="Restaurar larguras e pain?is"
+    >LAYOUT</button>
+
+    <button
+      class="workspace-header__mode"
+      id="workspace-mode"
+      type="button"
+      data-mode="safe"
+    >SAFE</button>
   </header>
 
   <div class="workspace-grid" id="workspace-grid">
     <aside class="workspace-pane workspace-pane--context" id="pane-context">
       <div class="workspace-pane__head">
-        <div class="workspace-pane__eyebrow">Contexto</div>
-        <div class="workspace-pane__title">Elementos do caso</div>
-        <button class="pane-collapse-btn" id="toggle-context-pane" type="button" aria-label="Colapsar Elementos do caso" title="Colapsar Elementos do caso">‹</button>
+        <div class="workspace-pane__eyebrow">ACERVO</div>
+        <div class="workspace-pane__title">POOL DO CASO</div>
+        <button class="pane-collapse-btn" id="toggle-context-pane" type="button" aria-label="Colapsar Pool do caso" title="Colapsar Pool do caso">&#8249;</button>
       </div>
       <div class="case-summary"><strong>{{ case.case_ref }}</strong><br>{{ case.classification or 'Sem classificação informada' }}</div>
 
@@ -369,9 +927,8 @@ body.workspace-resizing *{
 
     <main class="workspace-pane workspace-pane--work" id="pane-work">
       <div class="workspace-pane__head">
-        <div class="workspace-pane__eyebrow">Trabalho</div>
-        <div class="workspace-pane__title">Blocos investigativos</div>
-        <button class="pane-collapse-btn" id="toggle-work-pane" type="button" aria-label="Colapsar Blocos investigativos" title="Colapsar Blocos investigativos">›</button>
+        <div class="workspace-pane__eyebrow">MESA</div>
+        <div class="workspace-pane__title">CONSTRU&Ccedil;&Atilde;O DO RELAT&Oacute;RIO</div>
       </div>
       <div class="work-area">
         <form class="block-form" id="create-block-form" method="post" action="/api/workspaces/{{ workspace.id }}/blocks">
@@ -418,13 +975,77 @@ body.workspace-resizing *{
       </div>
     </main>
 
-    <div class="workspace-splitter" id="splitter-athena" role="separator" aria-orientation="vertical" aria-label="Redimensionar trabalho e Athena" title="Arraste para redimensionar. Duplo clique restaura o layout.">
+    <div class="workspace-splitter" id="splitter-athena" role="separator" aria-orientation="vertical" aria-label="Redimensionar Mesa e coluna direita" title="Arraste para redimensionar. Duplo clique restaura o layout.">
       <span class="workspace-splitter__grip"></span>
     </div>
 
-    <aside class="workspace-pane athena-pane">
+    <section class="workspace-right" id="pane-right">
+
+      <section
+        class="workspace-inspector"
+        id="workspace-inspector"
+        aria-label="Inspector contextual"
+      >
+        <div class="workspace-pane__head workspace-inspector__head">
+          <div class="workspace-pane__eyebrow">INSPECTOR</div>
+          <div class="workspace-pane__title">
+            {% if active_block %}
+            Preview do bloco {{ active_block.id }}
+            {% else %}
+            Produto em construcao
+            {% endif %}
+          </div>
+
+          <button
+            class="pane-collapse-btn"
+            id="toggle-right-pane"
+            type="button"
+            aria-label="Colapsar Inspector e Athena Composer"
+            aria-expanded="true"
+            title="Colapsar Inspector e Athena Composer"
+          >&#8250;</button>
+</div>
+
+        <div class="workspace-inspector__body">
+          <article class="workspace-document-sheet">
+            <div class="workspace-document-sheet__kicker">
+              CIRCE // ATHENA ? {{ case.case_ref }}
+            </div>
+
+            <h2>{{ case.title }}</h2>
+
+            {% if active_block %}
+            <div class="workspace-document-sheet__meta">
+              BLOCO {{ active_block.id }} ? {{ active_block.status }}
+            </div>
+
+            <h3>{{ active_block.title }}</h3>
+
+            {% if active_block.summary %}
+            <p>{{ active_block.summary }}</p>
+            {% else %}
+            <p class="workspace-document-sheet__muted">
+              Este bloco ainda nao possui resumo.
+            </p>
+            {% endif %}
+
+            {% else %}
+            <div class="workspace-document-sheet__meta">
+              PREVIEW CONTEXTUAL
+            </div>
+
+            <p class="workspace-document-sheet__muted">
+              Selecione um bloco na Mesa para visualizar aqui
+              a representacao contextual do trabalho ativo.
+            </p>
+            {% endif %}
+          </article>
+        </div>
+      </section>
+
+      <aside class="workspace-pane athena-pane">
       <div class="workspace-pane__head">
-        <div class="workspace-pane__eyebrow">Athena</div>
+        <div class="workspace-pane__eyebrow">ATHENA COMPOSER</div>
         <div class="workspace-pane__title">{% if active_block %}Contexto do bloco {{ active_block.id }}{% else %}Contexto do caso{% endif %}</div>
       </div>
       <div class="athena-stream" id="athena-stream">
@@ -439,7 +1060,8 @@ body.workspace-resizing *{
           <button class="athena-send" id="athena-send" type="button">Enviar</button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </section>
   </div>
 </section>
 
@@ -570,12 +1192,31 @@ restoreDocumentIntakeFeedback();
 // AT06A_RESIZABLE_TILING_V1
 const workspaceGrid=document.getElementById('workspace-grid');
 const contextPane=workspaceGrid?.querySelector('.workspace-pane:first-child');
-const athenaPane=workspaceGrid?.querySelector('.athena-pane');
+const athenaPane=document.getElementById('pane-right');
 const splitterContext=document.getElementById('splitter-context');
 const splitterAthena=document.getElementById('splitter-athena');
-const layoutStorageKey='circe-athena.workspace.layout.v1';
-const layoutDefaults={context:300,athena:380};
-const layoutLimits={contextMin:220,contextMax:560,athenaMin:300,athenaMax:760,workMin:360,gutters:14};
+const layoutStorageKey='circe-athena.workspace.layout.v3';
+const layoutDefaults={context:360,athena:480};
+const layoutLimits={
+  contextMin:220,
+  contextMax:560,
+  athenaMin:340,
+  athenaMax:680,
+  workMin:420,
+  gutters:14
+};
+const layoutRatios={context:.27,athena:.31};
+
+function proportionalLayout(){
+  const total=workspaceGrid
+    ? workspaceGrid.getBoundingClientRect().width
+    : 1500;
+
+  return {
+    context:Math.round(total*layoutRatios.context),
+    athena:Math.round(total*layoutRatios.athena)
+  };
+}
 
 function clamp(value,min,max){return Math.max(min,Math.min(max,value))}
 function currentPaneWidths(){
@@ -615,11 +1256,11 @@ function applyLayout(layout,persist=false){
 function loadLayout(){
   let saved=null;
   try{saved=JSON.parse(localStorage.getItem(layoutStorageKey)||'null')}catch(_){}
-  applyLayout(saved||layoutDefaults,false);
+  applyLayout(saved||proportionalLayout(),false);
 }
 function resetLayout(){
   try{localStorage.removeItem(layoutStorageKey)}catch(_){}
-  applyLayout(layoutDefaults,true);
+  applyLayout(proportionalLayout(),true);
 }
 function bindSplitter(splitter,side){
   if(!splitter||!workspaceGrid)return;
@@ -672,61 +1313,167 @@ window.addEventListener('resize',()=>{
   }
 });
 
-// AT06A_UNDO_V1
-// AT06A_COLLAPSIBLE_PANES_V1
+// UX01_PANELS_FINAL_V1
 const paneContext=document.getElementById('pane-context');
-const paneWork=document.getElementById('pane-work');
-const toggleContextPane=document.getElementById('toggle-context-pane');
-const toggleWorkPane=document.getElementById('toggle-work-pane');
-const resetWorkspaceLayout=document.getElementById('reset-workspace-layout');
-const collapseStorageKey='circe-athena.workspace.collapse.v1';
+const paneRight=document.getElementById('pane-right');
+
+const toggleContextPane=document.getElementById(
+  'toggle-context-pane'
+);
+
+const toggleRightPane=document.getElementById(
+  'toggle-right-pane'
+);
+
+const resetWorkspaceLayout=document.getElementById(
+  'reset-workspace-layout'
+);
+
+const collapseStorageKey='circe-athena.workspace.collapse.v2';
 
 function readCollapseState(){
   try{
-    const raw=JSON.parse(localStorage.getItem(collapseStorageKey)||'{}');
-    return {context:Boolean(raw.context),work:Boolean(raw.work)};
-  }catch(_){return {context:false,work:false}}
+    const raw=JSON.parse(
+      localStorage.getItem(collapseStorageKey)||'{}'
+    );
+
+    return {
+      context:Boolean(raw.context),
+      right:Boolean(raw.right)
+    };
+
+  }catch(_){
+    return {
+      context:false,
+      right:false
+    };
+  }
 }
+
 function saveCollapseState(state){
-  try{localStorage.setItem(collapseStorageKey,JSON.stringify(state))}catch(_){}
+  try{
+    localStorage.setItem(
+      collapseStorageKey,
+      JSON.stringify(state)
+    );
+  }catch(_){}
 }
+
 function applyCollapseState(state,persist=false){
-  if(!workspaceGrid||window.matchMedia('(max-width: 900px)').matches)return;
-  paneContext?.classList.toggle('is-collapsed',Boolean(state.context));
-  paneWork?.classList.toggle('is-collapsed',Boolean(state.work));
-  workspaceGrid.classList.toggle('context-collapsed',Boolean(state.context));
-  workspaceGrid.classList.toggle('work-collapsed',Boolean(state.work));
+  if(
+    !workspaceGrid ||
+    window.matchMedia('(max-width: 900px)').matches
+  ){
+    return;
+  }
+
+  paneContext?.classList.toggle(
+    'is-collapsed',
+    Boolean(state.context)
+  );
+
+  paneRight?.classList.toggle(
+    'is-collapsed',
+    Boolean(state.right)
+  );
+
+  workspaceGrid.classList.toggle(
+    'context-collapsed',
+    Boolean(state.context)
+  );
+
+  workspaceGrid.classList.toggle(
+    'right-collapsed',
+    Boolean(state.right)
+  );
 
   if(toggleContextPane){
-    toggleContextPane.textContent=state.context?'›':'‹';
-    toggleContextPane.title=state.context?'Expandir Elementos do caso':'Colapsar Elementos do caso';
-    toggleContextPane.setAttribute('aria-label',toggleContextPane.title);
-    toggleContextPane.setAttribute('aria-expanded',String(!state.context));
+    toggleContextPane.textContent=state.context?String.fromCharCode(8250):String.fromCharCode(8249);
+
+    toggleContextPane.title=
+      state.context
+        ?'Expandir Pool do Caso'
+        :'Colapsar Pool do Caso';
+
+    toggleContextPane.setAttribute(
+      'aria-label',
+      toggleContextPane.title
+    );
+
+    toggleContextPane.setAttribute(
+      'aria-expanded',
+      String(!state.context)
+    );
   }
-  if(toggleWorkPane){
-    toggleWorkPane.textContent=state.work?'‹':'›';
-    toggleWorkPane.title=state.work?'Expandir Blocos investigativos':'Colapsar Blocos investigativos';
-    toggleWorkPane.setAttribute('aria-label',toggleWorkPane.title);
-    toggleWorkPane.setAttribute('aria-expanded',String(!state.work));
+
+  if(toggleRightPane){
+    toggleRightPane.textContent=state.right?String.fromCharCode(8249):String.fromCharCode(8250);
+
+    toggleRightPane.title=
+      state.right
+        ?'Expandir Inspector e Athena Composer'
+        :'Colapsar Inspector e Athena Composer';
+
+    toggleRightPane.setAttribute(
+      'aria-label',
+      toggleRightPane.title
+    );
+
+    toggleRightPane.setAttribute(
+      'aria-expanded',
+      String(!state.right)
+    );
   }
-  if(persist)saveCollapseState(state);
+
+  if(persist){
+    saveCollapseState(state);
+  }
 }
+
 toggleContextPane?.addEventListener('click',()=>{
   const state=readCollapseState();
+
   state.context=!state.context;
-  applyCollapseState(state,true);
+
+  applyCollapseState(
+    state,
+    true
+  );
 });
-toggleWorkPane?.addEventListener('click',()=>{
+
+toggleRightPane?.addEventListener('click',()=>{
   const state=readCollapseState();
-  state.work=!state.work;
-  applyCollapseState(state,true);
+
+  state.right=!state.right;
+
+  applyCollapseState(
+    state,
+    true
+  );
 });
+
 resetWorkspaceLayout?.addEventListener('click',()=>{
-  try{localStorage.removeItem(collapseStorageKey)}catch(_){}
-  applyCollapseState({context:false,work:false},false);
+  try{
+    localStorage.removeItem(
+      collapseStorageKey
+    );
+  }catch(_){}
+
+  applyCollapseState(
+    {
+      context:false,
+      right:false
+    },
+    false
+  );
+
   resetLayout();
 });
-applyCollapseState(readCollapseState(),false);
+
+applyCollapseState(
+  readCollapseState(),
+  false
+);
 
 const sourceCheckboxes=Array.from(document.querySelectorAll('input[form="create-block-form"][name="sources"]'));
 const undoSelectionBtn=document.getElementById('undo-selection');
