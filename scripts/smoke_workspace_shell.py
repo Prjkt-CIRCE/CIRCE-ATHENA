@@ -8,14 +8,18 @@ required = {
     "ux01-base": "UX01_SHELL_V1",
     "ux01-refinement": "UX01_SHELL_REFINEMENT_V2",
     "brand": "CIRCE-ATHENA",
-    "codigo": "C?DIGO",
+    "codigo":
+        '<strong class="workspace-header__mono">{{ case.case_ref }}</strong>',
     "status": "STATUS",
-    "usuario": "USU?RIO",
-    "pool": ">Pool<",
-    "mesa": ">Mesa<",
+    "usuario":
+        'class="workspace-header__cell workspace-header__cell--operator"',
+    "pool":
+        '<aside class="workspace-pane workspace-pane--context" id="pane-context">',
+    "mesa":
+        '<main class="workspace-pane workspace-pane--work" id="pane-work">',
     "right-column": 'id="pane-right"',
     "inspector": 'id="workspace-inspector"',
-    "composer": "ATHENA // COMPOSER",
+    "composer": '<aside class="workspace-pane athena-pane">',
     "mock-ratio": "layoutRatios={context:.27,athena:.31}",
     "layout-v3": "circe-athena.workspace.layout.v3",
     "canonical-intake":
