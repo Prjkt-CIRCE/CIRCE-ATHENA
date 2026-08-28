@@ -750,6 +750,55 @@ body.workspace-resizing *{
   box-shadow:0 0 0 1px var(--accent);
 }
 
+/* UX02A_POOL_INVENTORY_V1 --------------------------------------- */
+.workspace-page #pane-context .pool-inventory-head{min-height:64px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding-right:42px}
+.workspace-page #pane-context .pool-inventory-head__copy{min-width:0}
+.workspace-page #pane-context .pool-inventory-head__actions{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.workspace-page #pane-context .pool-inventory-total{font-family:var(--font-mono);font-size:8px;line-height:1;letter-spacing:.08em;color:var(--text-tertiary)}
+.workspace-page #pane-context .pool-inventory-toolbar{padding:10px 12px 11px;border-bottom:1px solid var(--border-subtle);background:#191A1D}
+.workspace-page #pane-context .pool-inventory-case{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;font-family:var(--font-mono);font-size:8px;letter-spacing:.04em;color:var(--text-tertiary)}
+.workspace-page #pane-context .pool-inventory-case strong{overflow:hidden;text-overflow:ellipsis;color:var(--text-secondary)}
+.workspace-page #pane-context .pool-inventory-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(92px,.66fr);gap:6px}
+.workspace-page #pane-context .pool-inventory-tool{min-width:0}
+.workspace-page #pane-context .pool-inventory-tool--search{grid-column:1 / -1}
+.workspace-page #pane-context .pool-inventory-tool-label{display:block;margin-bottom:3px;font-family:var(--font-mono);font-size:7px;letter-spacing:.09em;color:var(--text-tertiary)}
+.workspace-page #pane-context .pool-inventory-search,
+.workspace-page #pane-context .pool-inventory-filter{width:100%;height:30px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:2px;outline:none;background:var(--bg-base);color:var(--text-primary);font:inherit;font-size:10px}
+.workspace-page #pane-context .pool-inventory-search:focus,
+.workspace-page #pane-context .pool-inventory-filter:focus{border-color:var(--accent)}
+.workspace-page #pane-context .pool-inventory-filter:disabled{color:var(--text-disabled);cursor:not-allowed}
+.workspace-page #pane-context .pool-inventory-selection-toggle{width:100%;min-height:30px;margin-top:7px;padding:0 8px;border:1px solid var(--border-subtle);border-radius:2px;background:transparent;color:var(--text-secondary);font-family:var(--font-mono);font-size:8px;letter-spacing:.04em;cursor:pointer}
+.workspace-page #pane-context .pool-inventory-selection-toggle:hover,
+.workspace-page #pane-context .pool-inventory-selection-toggle[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong)}
+.workspace-page #pane-context .pool-inventory-feedback{margin:8px 12px 0}
+.workspace-page #pane-context .pool-inventory-list{padding:4px 0 12px}
+.workspace-page #pane-context .pool-inventory-group{padding:0 12px}
+.workspace-page #pane-context .pool-inventory-group + .pool-inventory-group{margin-top:5px}
+.workspace-page #pane-context .pool-inventory-group__head{min-height:28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle);font-family:var(--font-mono);font-size:8px;letter-spacing:.09em;color:var(--text-tertiary)}
+.workspace-page #pane-context .pool-inventory-group__count{color:var(--text-secondary)}
+.workspace-page #pane-context .pool-inventory-item{min-height:43px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid rgba(44,46,56,.72)}
+.workspace-page #pane-context .pool-inventory-item:hover{background:rgba(232,181,89,.035)}
+.workspace-page #pane-context .pool-inventory-item__content{min-width:0}
+.workspace-page #pane-context .pool-inventory-item__primary{display:block;overflow:hidden;color:var(--text-primary);font-size:11px;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
+.workspace-page #pane-context .pool-inventory-item__meta{margin-top:3px;overflow:hidden;color:var(--text-tertiary);font-family:var(--font-mono);font-size:8px;line-height:1.35;text-overflow:ellipsis;white-space:nowrap}
+.workspace-page #pane-context .pool-inventory-item__state{display:inline-block;margin-top:4px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:7px;letter-spacing:.06em}
+.workspace-page #pane-context .pool-inventory-item__state--available{color:var(--success)}
+.workspace-page #pane-context .document-original-link{position:static;transform:none;white-space:nowrap}
+.workspace-page #pane-context .pool-inventory-select{display:none;margin:0;accent-color:var(--accent)}
+.workspace-page #pane-context.is-selection-mode .pool-inventory-item{grid-template-columns:16px minmax(0,1fr) auto}
+.workspace-page #pane-context.is-selection-mode .pool-inventory-select{display:block}
+.workspace-page #pane-context .pool-inventory-selection-bar{position:sticky;bottom:0;z-index:3;display:none;padding:9px 12px 11px;border-top:1px solid var(--border-strong);background:var(--bg-base)}
+.workspace-page #pane-context.is-selection-mode .pool-inventory-selection-bar{display:block}
+.workspace-page #pane-context .pool-inventory-selection-bar__count{margin-bottom:7px;color:var(--text-tertiary);font-family:var(--font-mono);font-size:8px}
+.workspace-page #pane-context .pool-inventory-selection-bar__actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.workspace-page #pane-context .pool-inventory-selection-bar button{height:28px;border:1px solid var(--border-subtle);border-radius:2px;background:transparent;color:var(--text-secondary);font:inherit;font-size:9px;cursor:pointer}
+.workspace-page #pane-context .pool-inventory-selection-bar button:disabled{opacity:.34;cursor:not-allowed}
+.workspace-page #pane-context .pool-inventory-family-empty,
+.workspace-page #pane-context .pool-inventory-empty{padding:11px 2px;color:var(--text-tertiary);font-size:10px}
+.workspace-page #pane-context [hidden]{display:none!important}
+.workspace-page #pane-context.is-collapsed .pool-inventory-head__actions{display:none}
+.workspace-page #pane-context.is-collapsed .pool-inventory-head__copy{display:contents}
+
 </style>
 
 <section class="workspace-page">
@@ -803,122 +852,163 @@ body.workspace-resizing *{
   </header>
 
   <div class="workspace-grid" id="workspace-grid">
+    <!-- UX02A_POOL_INVENTORY_START -->
+    {% set pool_total = persons|length + documents|length + links|length + annotations|length %}
     <aside class="workspace-pane workspace-pane--context" id="pane-context">
-      <div class="workspace-pane__head">
-        <div class="workspace-pane__eyebrow">ACERVO</div>
-        <div class="workspace-pane__title">POOL DO CASO</div>
+      <div class="workspace-pane__head pool-inventory-head">
+        <div class="pool-inventory-head__copy">
+          <div class="workspace-pane__eyebrow">ACERVO</div>
+          <div class="workspace-pane__title">ACERVO DO CASO</div>
+        </div>
+        <div class="pool-inventory-head__actions">
+          <span class="pool-inventory-total" id="pool-inventory-total">{{ pool_total }} MATERIAIS</span>
+          <button class="document-intake-trigger" id="document-intake-trigger" type="button" title="Incorporar um arquivo original ao Caso">INCORPORAR MATERIAL</button>
+          <input id="document-intake-input" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.docx,.xlsx" hidden>
+        </div>
         <button class="pane-collapse-btn" id="toggle-context-pane" type="button" aria-label="Colapsar Pool do caso" title="Colapsar Pool do caso">&#8249;</button>
       </div>
-      <div class="case-summary"><strong>{{ case.case_ref }}</strong><br>{{ case.classification or 'Sem classificação informada' }}</div>
 
-      <div class="context-section">
-        <div class="context-section__title"><span>Pessoas</span><span>{{ persons|length }}</span></div>
-        {% for item in persons %}
-        <label class="context-item">
-          <input form="create-block-form" type="checkbox" name="sources" value="person:{{ item.id }}">
-          <span><span>{{ item.full_name }}</span><div class="context-item__meta">{{ item.person_ref or item.cpf or item.rg or 'sem referência externa' }}</div></span>
-        </label>
-        {% else %}<div class="empty-list">Nenhuma pessoa.</div>{% endfor %}
+      <div class="pool-inventory-toolbar">
+        <div class="pool-inventory-case">
+          <strong>{{ case.case_ref }}</strong>
+          <span>{{ case.classification or 'SEM CLASSIFICACAO' }}</span>
+        </div>
+        <div class="pool-inventory-tools">
+          <label class="pool-inventory-tool pool-inventory-tool--search">
+            <span class="pool-inventory-tool-label">BUSCA</span>
+            <input class="pool-inventory-search" id="pool-inventory-search" type="search" placeholder="Buscar no acervo" autocomplete="off">
+          </label>
+          <label class="pool-inventory-tool">
+            <span class="pool-inventory-tool-label">FAMILIA</span>
+            <select class="pool-inventory-filter" id="pool-family-filter">
+              <option value="all">Todos</option>
+              <option value="document">Documentos</option>
+              <option value="person">Pessoas</option>
+              <option value="link">V&iacute;nculos</option>
+              <option value="annotation">Anota&ccedil;&otilde;es</option>
+            </select>
+          </label>
+          <label class="pool-inventory-tool">
+            <span class="pool-inventory-tool-label">DOCUMENTOS</span>
+            <select class="pool-inventory-filter" id="pool-document-filter">
+              <option value="all">Todos os documentos</option>
+              <option value="original">Com Original</option>
+              <option value="metadata">Somente metadados</option>
+            </select>
+          </label>
+        </div>
+        <button class="pool-inventory-selection-toggle" id="pool-selection-mode-toggle" type="button" aria-pressed="false">SELECIONAR PARA A MESA</button>
       </div>
 
-      <div class="context-section context-section--documents" id="case-documents-section">
-        <div class="context-section__title document-section__head">
-          <span>Documentos</span>
-          <div class="document-section__tools">
-            <span>{{ documents|length }}</span>
-            <button
-              class="document-intake-trigger"
-              id="document-intake-trigger"
-              type="button"
-              title="Incorporar um arquivo original ao Caso"
-            >INCORPORAR MATERIAL</button>
-            <input
-              id="document-intake-input"
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg,.txt,.csv,.docx,.xlsx"
-              hidden
-            >
+      <div class="document-intake-feedback pool-inventory-feedback" id="document-intake-feedback" role="status" aria-live="polite" hidden></div>
+      <div class="pool-inventory-list" id="pool-inventory-list">
+
+      <section class="pool-inventory-group" data-pool-family="person">
+        <div class="pool-inventory-group__head">
+          <span>PESSOAS</span>
+          <span class="pool-inventory-group__count" data-family-count data-family-total="{{ persons|length }}">{{ persons|length }}</span>
+        </div>
+        {% for item in persons %}
+        <div class="pool-inventory-item" data-material-family="person" data-search-text="{{ item.full_name }} {{ item.person_ref or '' }} {{ item.aliases or '' }} {{ item.cpf or '' }} {{ item.rg or '' }} {{ item.role_in_case or '' }} {{ item.reliability_level or '' }} {{ item.notes or '' }}">
+          <input class="pool-inventory-select" form="create-block-form" type="checkbox" name="sources" value="person:{{ item.id }}" aria-label="Selecionar pessoa {{ item.full_name }}">
+          <div class="pool-inventory-item__content">
+            <span class="pool-inventory-item__primary">{{ item.full_name }}</span>
+            <div class="pool-inventory-item__meta">{{ item.person_ref or item.cpf or item.rg or 'sem referencia externa' }}{% if item.role_in_case %} &middot; {{ item.role_in_case }}{% endif %}{% if item.reliability_level %} &middot; {{ item.reliability_level }}{% endif %}</div>
           </div>
         </div>
+        {% else %}<div class="pool-inventory-family-empty">Nenhuma pessoa no Caso.</div>{% endfor %}
+      </section>
 
-        <div
-          class="document-intake-feedback"
-          id="document-intake-feedback"
-          role="status"
-          aria-live="polite"
-          hidden
-        ></div>
-
+      <section class="pool-inventory-group" id="case-documents-section" data-pool-family="document">
+        <div class="pool-inventory-group__head">
+          <span>DOCUMENTOS</span>
+          <span class="pool-inventory-group__count" data-family-count data-family-total="{{ documents|length }}">{{ documents|length }}</span>
+        </div>
         <div id="case-document-list">
           {% for item in documents %}
           <div
-            class="context-item document-context-item"
+            class="pool-inventory-item pool-inventory-item--document"
+            data-material-family="document"
             data-document-id="{{ item.id }}"
             data-storage-state="{{ item.storage_state }}"
+            data-has-original="{{ 'true' if item.physical_available else 'false' }}"
+            data-document-type="{{ item.file_type or item.mime_type or '' }}"
+            data-search-text="{{ item.filename }} {{ item.document_ref or '' }} {{ item.file_type or '' }} {{ item.mime_type or '' }} {{ item.sha256 or '' }} {{ item.description or '' }} {{ item.imported_at or '' }} {{ item.storage_origin or '' }}"
           >
             <input
+              class="pool-inventory-select"
               form="create-block-form"
               type="checkbox"
               name="sources"
               value="document:{{ item.id }}"
               aria-label="Selecionar documento {{ item.filename }}"
             >
-
-            <span class="document-context-item__body">
-              <span class="document-context-item__name">{{ item.filename }}</span>
-
-              <div class="context-item__meta">
-                {{ item.document_ref or (item.sha256[:16] ~ '?' if item.sha256 else 'sem hash') }}
-              </div>
-
+            <div class="pool-inventory-item__content">
+              <span class="pool-inventory-item__primary">{{ item.filename }}</span>
+              <div class="pool-inventory-item__meta">{{ item.file_type or item.mime_type or 'tipo nao informado' }}{% if item.size_bytes is not none %} &middot; {{ item.size_bytes }} bytes{% endif %}{% if item.document_ref %} &middot; {{ item.document_ref }}{% elif item.sha256 %} &middot; SHA {{ item.sha256[:16] }}&hellip;{% endif %}</div>
               {% if item.physical_available %}
-              <span class="document-state document-state--available">DISPON?VEL</span>
+              <span class="pool-inventory-item__state pool-inventory-item__state--available document-state document-state--available">ORIGINAL DISPONIVEL</span>
               {% else %}
-              <span class="document-state document-state--metadata">METADADOS</span>
+              <span class="pool-inventory-item__state document-state document-state--metadata">SOMENTE METADADOS</span>
               {% endif %}
-            </span>
-
+            </div>
             {% if item.physical_available %}
             <a
               class="document-original-link"
               href="/api/documents/{{ item.id }}/original"
-              title="Recuperar o original f?sico"
-            >Original</a>
+              title="Recuperar o original fisico"
+            >ORIGINAL</a>
             {% endif %}
           </div>
           {% else %}
-          <div class="empty-list">Nenhum documento.</div>
+          <div class="pool-inventory-family-empty">Nenhum documento no Caso.</div>
           {% endfor %}
         </div>
-      </div>
+      </section>
 
-      <div class="context-section">
-        <div class="context-section__title"><span>Vínculos</span><span>{{ links|length }}</span></div>
+      <section class="pool-inventory-group" data-pool-family="link">
+        <div class="pool-inventory-group__head">
+          <span>V&Iacute;NCULOS</span>
+          <span class="pool-inventory-group__count" data-family-count data-family-total="{{ links|length }}">{{ links|length }}</span>
+        </div>
         {% for item in links %}
-        <label class="context-item">
-          <input form="create-block-form" type="checkbox" name="sources" value="link:{{ item.id }}">
-          <span><span>{{ item.entity_a_name or item.entity_a_ref }} → {{ item.entity_b_name or item.entity_b_ref }}</span><div class="context-item__meta">{{ item.link_type }} · {{ item.link_nature or 'natureza não informada' }}</div></span>
-        </label>
-        {% else %}<div class="empty-list">Nenhum vínculo.</div>{% endfor %}
-      </div>
+        <div class="pool-inventory-item" data-material-family="link" data-search-text="{{ item.entity_a_name or '' }} {{ item.entity_a_ref }} {{ item.entity_b_name or '' }} {{ item.entity_b_ref }} {{ item.link_type }} {{ item.link_nature or '' }} {{ item.notes or '' }}">
+          <input class="pool-inventory-select" form="create-block-form" type="checkbox" name="sources" value="link:{{ item.id }}" aria-label="Selecionar vinculo {{ item.id }}">
+          <div class="pool-inventory-item__content">
+            <span class="pool-inventory-item__primary">{{ item.entity_a_name or item.entity_a_ref }} &rarr; {{ item.entity_b_name or item.entity_b_ref }}</span>
+            <div class="pool-inventory-item__meta">{{ item.link_type }}{% if item.link_nature %} &middot; {{ item.link_nature }}{% endif %}</div>
+          </div>
+        </div>
+        {% else %}<div class="pool-inventory-family-empty">Nenhum vinculo no Caso.</div>{% endfor %}
+      </section>
 
-      <div class="context-section">
-        <div class="context-section__title"><span>Anotações</span><span>{{ annotations|length }}</span></div>
+      <section class="pool-inventory-group" data-pool-family="annotation">
+        <div class="pool-inventory-group__head">
+          <span>ANOTA&Ccedil;&Otilde;ES</span>
+          <span class="pool-inventory-group__count" data-family-count data-family-total="{{ annotations|length }}">{{ annotations|length }}</span>
+        </div>
         {% for item in annotations %}
-        <label class="context-item">
-          <input form="create-block-form" type="checkbox" name="sources" value="annotation:{{ item.id }}">
-          <span><span>{{ item.content[:120] }}{% if item.content|length > 120 %}…{% endif %}</span><div class="context-item__meta">{{ item.created_by_username }} · {{ item.source }}</div></span>
-        </label>
-        {% else %}<div class="empty-list">Nenhuma anotação.</div>{% endfor %}
+        <div class="pool-inventory-item" data-material-family="annotation" data-search-text="{{ item.content }} {{ item.created_by_username }} {{ item.source }} {{ item.created_at }}">
+          <input class="pool-inventory-select" form="create-block-form" type="checkbox" name="sources" value="annotation:{{ item.id }}" aria-label="Selecionar anotacao {{ item.id }}">
+          <div class="pool-inventory-item__content">
+            <span class="pool-inventory-item__primary">{{ item.content[:120] }}{% if item.content|length > 120 %}&hellip;{% endif %}</span>
+            <div class="pool-inventory-item__meta">{{ item.created_by_username }} &middot; {{ item.source }}{% if item.created_at %} &middot; {{ item.created_at }}{% endif %}</div>
+          </div>
+        </div>
+        {% else %}<div class="pool-inventory-family-empty">Nenhuma anotacao no Caso.</div>{% endfor %}
+      </section>
+
+        <div class="pool-inventory-empty" id="pool-inventory-empty" role="status" hidden>Nenhum material corresponde a busca e aos filtros atuais.</div>
       </div>
 
-      <div class="context-selection-bar" id="context-selection-bar">
-        <div class="context-selection-bar__count" id="selection-count">0 elementos selecionados</div>
-        <div class="context-selection-bar__actions">
+      <div class="pool-inventory-selection-bar" id="context-selection-bar">
+        <div class="pool-inventory-selection-bar__count" id="selection-count">0 elementos selecionados</div>
+        <div class="pool-inventory-selection-bar__actions">
           <button id="undo-selection" type="button" disabled>Desfazer</button>
           <button id="clear-selection" type="button" disabled>Limpar</button>
         </div>
       </div>
+      <!-- UX02A_POOL_INVENTORY_END -->
     </aside>
 
     <div class="workspace-splitter" id="splitter-context" role="separator" aria-orientation="vertical" aria-label="Redimensionar contexto e trabalho" title="Arraste para redimensionar. Duplo clique restaura o layout.">
@@ -1085,7 +1175,7 @@ function setDocumentIntakeFeedback(message,kind){
   if(!documentIntakeFeedback)return;
   documentIntakeFeedback.hidden=false;
   documentIntakeFeedback.textContent=message;
-  documentIntakeFeedback.className='document-intake-feedback';
+  documentIntakeFeedback.className='document-intake-feedback pool-inventory-feedback';
   if(kind)documentIntakeFeedback.classList.add('is-'+kind);
 }
 
@@ -1187,6 +1277,92 @@ documentIntakeInput?.addEventListener('change',async()=>{
 });
 
 restoreDocumentIntakeFeedback();
+
+// UX02A_POOL_INVENTORY_V1
+const poolInventorySearch=document.getElementById('pool-inventory-search');
+const poolFamilyFilter=document.getElementById('pool-family-filter');
+const poolDocumentFilter=document.getElementById('pool-document-filter');
+const poolInventoryEmpty=document.getElementById('pool-inventory-empty');
+const poolInventoryGroups=Array.from(document.querySelectorAll('[data-pool-family]'));
+const poolInventoryItems=Array.from(document.querySelectorAll('[data-material-family]'));
+const poolSelectionModeToggle=document.getElementById('pool-selection-mode-toggle');
+
+function normalizePoolText(value){
+  return String(value||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLocaleLowerCase('pt-BR')
+    .trim();
+}
+
+function populateDocumentTypeFilters(){
+  if(!poolDocumentFilter)return;
+  const types=Array.from(new Set(
+    poolInventoryItems
+      .filter(item=>item.dataset.materialFamily==='document')
+      .map(item=>normalizePoolText(item.dataset.documentType))
+      .filter(Boolean)
+  )).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+
+  types.forEach(type=>{
+    const option=document.createElement('option');
+    option.value='type:'+type;
+    option.textContent=type.toLocaleUpperCase('pt-BR');
+    poolDocumentFilter.appendChild(option);
+  });
+}
+
+function applyPoolInventoryFilters(){
+  const query=normalizePoolText(poolInventorySearch?.value);
+  const family=poolFamilyFilter?.value||'all';
+  const documentFilter=poolDocumentFilter?.value||'all';
+  const documentFilterApplies=family==='all'||family==='document';
+  const filtersActive=Boolean(query)||family!=='all'||(documentFilterApplies&&documentFilter!=='all');
+  let visibleTotal=0;
+
+  poolInventoryItems.forEach(item=>{
+    const itemFamily=item.dataset.materialFamily;
+    const familyMatches=family==='all'||itemFamily===family;
+    const searchMatches=!query||normalizePoolText(item.dataset.searchText).includes(query);
+    let documentMatches=true;
+
+    if(itemFamily==='document'&&documentFilterApplies){
+      if(documentFilter==='original')documentMatches=item.dataset.hasOriginal==='true';
+      else if(documentFilter==='metadata')documentMatches=item.dataset.hasOriginal!=='true';
+      else if(documentFilter.startsWith('type:')){
+        documentMatches=normalizePoolText(item.dataset.documentType)===documentFilter.slice(5);
+      }
+    }
+
+    const visible=familyMatches&&searchMatches&&documentMatches;
+    item.hidden=!visible;
+    if(visible)visibleTotal+=1;
+  });
+
+  poolInventoryGroups.forEach(group=>{
+    const groupFamily=group.dataset.poolFamily;
+    const groupMatches=family==='all'||groupFamily===family;
+    const items=Array.from(group.querySelectorAll('[data-material-family]'));
+    const visible=items.filter(item=>!item.hidden).length;
+    const counter=group.querySelector('[data-family-count]');
+    const total=Number(counter?.dataset.familyTotal||items.length);
+    if(counter)counter.textContent=filtersActive?visible+'/'+total:String(total);
+    group.hidden=!groupMatches||(filtersActive&&visible===0);
+  });
+
+  if(poolDocumentFilter){
+    poolDocumentFilter.disabled=family!=='all'&&family!=='document';
+  }
+  if(poolInventoryEmpty){
+    poolInventoryEmpty.hidden=!(filtersActive&&visibleTotal===0);
+  }
+}
+
+poolInventorySearch?.addEventListener('input',applyPoolInventoryFilters);
+poolFamilyFilter?.addEventListener('change',applyPoolInventoryFilters);
+poolDocumentFilter?.addEventListener('change',applyPoolInventoryFilters);
+populateDocumentTypeFilters();
+applyPoolInventoryFilters();
 
 
 // AT06A_RESIZABLE_TILING_V1
@@ -1514,6 +1690,22 @@ clearSelectionBtn.addEventListener('click',()=>{
   updateSelectionControls();
 });
 updateSelectionControls();
+
+function setPoolSelectionMode(active){
+  paneContext?.classList.toggle('is-selection-mode',active);
+  if(poolSelectionModeToggle){
+    poolSelectionModeToggle.setAttribute('aria-pressed',String(active));
+    poolSelectionModeToggle.textContent=active
+      ?'SAIR DA SELE\u00c7\u00c3O'
+      :'SELECIONAR PARA A MESA';
+  }
+  updateSelectionControls();
+}
+
+poolSelectionModeToggle?.addEventListener('click',()=>{
+  const active=poolSelectionModeToggle.getAttribute('aria-pressed')!=='true';
+  setPoolSelectionMode(active);
+});
 
 const createBlockForm=document.getElementById('create-block-form');
 createBlockForm.addEventListener('submit',event=>{
