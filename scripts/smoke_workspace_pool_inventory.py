@@ -123,8 +123,18 @@ forbidden_found = [
 
 assert ".workspace-page #pane-context" in pool_css
 assert "rgba(95,179,207" not in pool_css
-assert "dragover" not in pool
-assert "dataTransfer" not in template
+for event_name in ("dragenter", "dragover", "dragleave", "drop"):
+    listener = f".addEventListener('{event_name}'"
+    assert template.count(listener) == 1
+    assert f"poolIntakeDropzone?{listener}" in template
+
+assert "dataTransfer" in template
+for global_target in ("document", "window", "document.body"):
+    for event_name in ("dragenter", "dragover", "dragleave", "drop"):
+        assert (
+            f"{global_target}.addEventListener('{event_name}'"
+            not in template
+        )
 
 if missing_pool or missing_template or legacy_pool or forbidden_found:
     details = []
@@ -150,5 +160,4 @@ print("mesa-selection=explicit-mode")
 print("canonical-intake=preserved")
 print("governed-original=preserved")
 print("legacy-pool-dom=no")
-print("drag-and-drop=not-implemented")
-
+print("drag-and-drop=pool-intake-local-only")

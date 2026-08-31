@@ -315,9 +315,11 @@ body.workspace-resizing *{
   font-size:10px;
   line-height:1.4;
 }
+.document-intake-feedback.is-started{border-color:rgba(95,179,207,.22);color:var(--accent)}
 .document-intake-feedback.is-working{border-color:rgba(95,179,207,.28);color:var(--accent)}
 .document-intake-feedback.is-success{border-color:rgba(124,184,124,.28);color:var(--success)}
 .document-intake-feedback.is-warning{border-color:rgba(217,178,90,.30);color:var(--warning)}
+.document-intake-feedback.is-duplicate{border-color:rgba(217,178,90,.30);color:var(--warning)}
 .document-intake-feedback.is-error{border-color:rgba(210,119,115,.30);color:var(--error)}
 
 .document-context-item{
@@ -799,6 +801,18 @@ body.workspace-resizing *{
 .workspace-page #pane-context.is-collapsed .pool-inventory-head__actions{display:none}
 .workspace-page #pane-context.is-collapsed .pool-inventory-head__copy{display:contents}
 
+/* UX02B_POOL_INTAKE_V1 ------------------------------------------ */
+.workspace-page #pane-context .pool-intake-dropzone{margin:10px 12px 0;padding:10px;border:1px dashed var(--border-strong);border-radius:3px;background:rgba(255,255,255,.015);color:var(--text-tertiary);text-align:center;transition:border-color .14s ease,background .14s ease,color .14s ease}
+.workspace-page #pane-context .pool-intake-dropzone__title{display:block;color:var(--text-secondary);font-family:var(--font-mono);font-size:8px;font-weight:600;letter-spacing:.07em}
+.workspace-page #pane-context .pool-intake-dropzone__hint{display:block;margin-top:3px;font-size:9px;line-height:1.35}
+.workspace-page #pane-context .pool-intake-dropzone.is-drag-active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.workspace-page #pane-context .pool-intake-dropzone.is-started{border-color:var(--accent);color:var(--accent)}
+.workspace-page #pane-context .pool-intake-dropzone.is-working{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.workspace-page #pane-context .pool-intake-dropzone.is-success{border-color:var(--success);color:var(--success)}
+.workspace-page #pane-context .pool-intake-dropzone.is-duplicate{border-color:var(--warning);color:var(--warning)}
+.workspace-page #pane-context .pool-intake-dropzone.is-error{border-color:var(--error);color:var(--error)}
+.workspace-page #pane-context .pool-intake-dropzone[aria-busy="true"]{cursor:wait}
+
 </style>
 
 <section class="workspace-page">
@@ -899,6 +913,21 @@ body.workspace-resizing *{
         </div>
         <button class="pool-inventory-selection-toggle" id="pool-selection-mode-toggle" type="button" aria-pressed="false">SELECIONAR PARA A MESA</button>
       </div>
+
+      <!-- UX02B_POOL_INTAKE_START -->
+      <div
+        class="pool-intake-dropzone"
+        id="pool-intake-dropzone"
+        role="region"
+        aria-label="Incorporar arquivo ao acervo do Caso"
+        aria-describedby="pool-intake-dropzone-hint"
+        aria-busy="false"
+        data-intake-state="idle"
+      >
+        <span class="pool-intake-dropzone__title">SOLTE UM ARQUIVO NESTE POOL</span>
+        <span class="pool-intake-dropzone__hint" id="pool-intake-dropzone-hint">Um material por vez. Use tamb&eacute;m Incorporar material para abrir o seletor nativo.</span>
+      </div>
+      <!-- UX02B_POOL_INTAKE_END -->
 
       <div class="document-intake-feedback pool-inventory-feedback" id="document-intake-feedback" role="status" aria-live="polite" hidden></div>
       <div class="pool-inventory-list" id="pool-inventory-list">
@@ -1169,7 +1198,14 @@ const modeBtn=document.getElementById('workspace-mode');
 const documentIntakeTrigger=document.getElementById('document-intake-trigger');
 const documentIntakeInput=document.getElementById('document-intake-input');
 const documentIntakeFeedback=document.getElementById('document-intake-feedback');
+// UX02B_POOL_INTAKE_V1
+const poolIntakeDropzone=document.getElementById('pool-intake-dropzone');
 const intakeFeedbackKey='circe-athena.document-intake.'+caseRef;
+const intakeVisualStates=['started','working','success','duplicate','error'];
+const INTAKE_STARTED_MIN_MS=600;
+const INTAKE_PROCESSING_MIN_MS=1000;
+let documentIntakeBusy=false;
+let poolIntakeDragDepth=0;
 
 function setDocumentIntakeFeedback(message,kind){
   if(!documentIntakeFeedback)return;
@@ -1177,6 +1213,30 @@ function setDocumentIntakeFeedback(message,kind){
   documentIntakeFeedback.textContent=message;
   documentIntakeFeedback.className='document-intake-feedback pool-inventory-feedback';
   if(kind)documentIntakeFeedback.classList.add('is-'+kind);
+  if(poolIntakeDropzone){
+    intakeVisualStates.forEach(state=>{
+      poolIntakeDropzone.classList.remove('is-'+state);
+    });
+    if(kind&&intakeVisualStates.includes(kind)){
+      poolIntakeDropzone.classList.add('is-'+kind);
+    }
+    poolIntakeDropzone.dataset.intakeState=kind||'idle';
+  }
+}
+
+function setDocumentIntakeBusy(busy){
+  documentIntakeBusy=busy;
+  if(documentIntakeTrigger){
+    if(busy)documentIntakeTrigger.disabled=true;
+    else documentIntakeTrigger.disabled=false;
+  }
+  if(poolIntakeDropzone){
+    poolIntakeDropzone.setAttribute('aria-busy',String(busy));
+  }
+}
+
+function waitForIntakePresentation(milliseconds){
+  return new Promise(resolve=>setTimeout(resolve,milliseconds));
 }
 
 function restoreDocumentIntakeFeedback(){
@@ -1192,26 +1252,11 @@ function restoreDocumentIntakeFeedback(){
 }
 
 documentIntakeTrigger?.addEventListener('click',()=>{
-  if(documentIntakeTrigger.disabled)return;
+  if(documentIntakeBusy)return;
   documentIntakeInput?.click();
 });
 
-documentIntakeInput?.addEventListener('change',async()=>{
-  const file=documentIntakeInput.files?.[0];
-  if(!file)return;
-
-  const originalText=documentIntakeTrigger?.textContent||'INCORPORAR MATERIAL';
-
-  if(documentIntakeTrigger){
-    documentIntakeTrigger.disabled=true;
-    documentIntakeTrigger.textContent='INCORPORANDO?';
-  }
-
-  setDocumentIntakeFeedback(
-    'Incorporando '+file.name+' ao Caso?',
-    'working'
-  );
-
+async function requestDocumentIntake(file){
   const formData=new FormData();
   formData.append('file',file);
 
@@ -1227,6 +1272,43 @@ documentIntakeInput?.addEventListener('change',async()=>{
 
     let payload=null;
     try{payload=await response.json()}catch(_){}
+    return {response,payload,error:null};
+  }catch(error){
+    return {response:null,payload:null,error};
+  }
+}
+
+async function presentDocumentIntakeProgress(file){
+  await waitForIntakePresentation(INTAKE_STARTED_MIN_MS);
+
+  if(documentIntakeTrigger)documentIntakeTrigger.textContent='INCORPORANDO…';
+  setDocumentIntakeFeedback(
+    'Intake iniciado — Incorporando…',
+    'working'
+  );
+
+  await waitForIntakePresentation(INTAKE_PROCESSING_MIN_MS);
+}
+
+async function incorporateDocumentFile(file){
+  if(!file||documentIntakeBusy)return;
+  const originalText=documentIntakeTrigger?.textContent||'INCORPORAR MATERIAL';
+  setDocumentIntakeBusy(true);
+  setDocumentIntakeFeedback(
+    'Intake iniciado',
+    'started'
+  );
+
+  const requestPromise=requestDocumentIntake(file);
+  const presentationPromise=presentDocumentIntakeProgress(file);
+
+  try{
+    const [requestResult]=await Promise.all(
+      [requestPromise,presentationPromise]
+    );
+    if(requestResult.error)throw requestResult.error;
+
+    const {response,payload}=requestResult;
 
     if(!response.ok){
       throw new Error(
@@ -1239,41 +1321,100 @@ documentIntakeInput?.addEventListener('change',async()=>{
     let kind='success';
 
     if(payload?.status==='duplicate'){
-      message='Documento j? existe neste Caso. Nenhuma nova c?pia foi criada.';
-      kind='warning';
+      message='Documento já existe neste Caso. Nenhuma nova cópia foi criada.';
+      kind='duplicate';
     }else if(payload?.status==='hydrated'){
-      message='Original f?sico vinculado ao documento existente.';
+      message='Original físico vinculado ao documento existente.';
     }else if(payload?.document?.filename){
       message='Material incorporado: '+payload.document.filename+'.';
     }
 
     setDocumentIntakeFeedback(message,kind);
 
-    try{
-      sessionStorage.setItem(
-        intakeFeedbackKey,
-        JSON.stringify({message,kind})
-      );
-    }catch(_){}
-
-    window.setTimeout(
-      ()=>window.location.reload(),
-      450
-    );
+    if(payload?.status==='created'||payload?.status==='hydrated'){
+      try{
+        sessionStorage.setItem(
+          intakeFeedbackKey,
+          JSON.stringify({message,kind})
+        );
+      }catch(_){}
+      setDocumentIntakeBusy(false);
+      if(documentIntakeTrigger)documentIntakeTrigger.textContent=originalText;
+      if(documentIntakeInput)documentIntakeInput.value='';
+      window.location.reload();
+      return;
+    }
 
   }catch(error){
     setDocumentIntakeFeedback(
-      error?.message||'N?o foi poss?vel incorporar o material.',
+      error?.message||'Não foi possível incorporar o material.',
       'error'
     );
-
-    if(documentIntakeTrigger){
-      documentIntakeTrigger.disabled=false;
-      documentIntakeTrigger.textContent=originalText;
-    }
-
-    documentIntakeInput.value='';
+  }finally{
+    setDocumentIntakeBusy(false);
+    if(documentIntakeTrigger)documentIntakeTrigger.textContent=originalText;
+    if(documentIntakeInput)documentIntakeInput.value='';
   }
+}
+
+documentIntakeInput?.addEventListener('change',()=>{
+  const files=Array.from(documentIntakeInput.files||[]);
+  if(files.length!==1)return;
+  if(documentIntakeBusy){
+    documentIntakeInput.value='';
+    return;
+  }
+  incorporateDocumentFile(files[0]);
+});
+
+function isPoolFileDrag(event){
+  return Array.from(event.dataTransfer?.types||[]).includes('Files');
+}
+
+poolIntakeDropzone?.addEventListener('dragenter',event=>{
+  if(!isPoolFileDrag(event))return;
+  event.preventDefault();
+  poolIntakeDragDepth+=1;
+  poolIntakeDropzone.classList.add('is-drag-active');
+});
+
+poolIntakeDropzone?.addEventListener('dragover',event=>{
+  if(!isPoolFileDrag(event))return;
+  event.preventDefault();
+  if(event.dataTransfer)event.dataTransfer.dropEffect='copy';
+});
+
+poolIntakeDropzone?.addEventListener('dragleave',event=>{
+  if(!isPoolFileDrag(event))return;
+  poolIntakeDragDepth=Math.max(0,poolIntakeDragDepth-1);
+  if(poolIntakeDragDepth===0){
+    poolIntakeDropzone.classList.remove('is-drag-active');
+  }
+});
+
+poolIntakeDropzone?.addEventListener('drop',event=>{
+  if(!isPoolFileDrag(event))return;
+  event.preventDefault();
+  poolIntakeDragDepth=0;
+  poolIntakeDropzone.classList.remove('is-drag-active');
+
+  const files=Array.from(event.dataTransfer?.files||[]);
+  if(files.length===0)return;
+  if(files.length!==1){
+    setDocumentIntakeFeedback(
+      'Este Intake aceita exatamente um arquivo por vez.',
+      'error'
+    );
+    return;
+  }
+  if(documentIntakeBusy){
+    setDocumentIntakeFeedback(
+      'Uma incorporação já está sendo processada.',
+      'working'
+    );
+    return;
+  }
+  incorporateDocumentFile(files[0]);
 });
 
 restoreDocumentIntakeFeedback();
